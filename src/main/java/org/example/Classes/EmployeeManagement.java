@@ -1,4 +1,4 @@
-package com.example.ClothingStoreJavaProject.Classes;
+package org.example.Classes;
 
 import java.util.ArrayList;
 import java.util.List;

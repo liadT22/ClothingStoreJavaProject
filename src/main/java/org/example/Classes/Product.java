@@ -1,4 +1,4 @@
-package com.example.ClothingStoreJavaProject.Classes;
+package org.example.Classes;
 
 public class Product {
     private String productID;
