@@ -8,7 +8,7 @@ public class Main {
         Employee Liad= new Employee("1", "Liad", "111", "1", "1", "1", "1");
         String json = new Gson().toJson(Liad);
         System.out.println(json);
-        Employee Liad2 = new Gson().fromJson(json, Employee.class);
-        System.out.println(Liad2.getEmployeeID());
+        Employee Liad1 = new Gson().fromJson(json, Employee.class);
+        System.out.println(Liad1.getEmployeeID());
     }
 }
