@@ -6,6 +6,10 @@ import org.json.simple.parser.JSONParser;
 
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 public class Product {
     private String productID;
@@ -67,6 +71,32 @@ public class Product {
     }
 
     //Methods
+    public int getStockQuantity(String branchId) {
+        JSONParser parser = new JSONParser();
+        try {
+            JSONObject branchStock = (JSONObject) parser.parse(new FileReader("branchStock.json"));
+            JSONArray products = (JSONArray) branchStock.get("products");
+
+            // Iterate over products to find the matching productID
+            for (Object productObj : products) {
+                JSONObject product = (JSONObject) productObj;
+                if (product.get("productID").equals(this.productID)) {
+                    JSONArray branches = (JSONArray) product.get("branches");
+
+                    // Iterate over branches to find the matching branchID
+                    for (Object branchObj : branches) {
+                        JSONObject branch = (JSONObject) branchObj;
+                        if (branch.get("branchID").equals(branchId)) {
+                            return ((Long) branch.get("quantity")).intValue();
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;  // Return 0 if product or branch not found
+    }
     private void addProductToCatalog() {
         JSONParser parser = new JSONParser();
         try {
@@ -161,27 +191,86 @@ public class Product {
 
     }
 
-    public void updateSalesAnalyticsAfterSale(int quantitySold, String branchId){
+    public void updateBranchStockAfterRestock(int quantityAdded, String branchId){
+        // Load the JSON file
+        JSONParser stockParser = new JSONParser();
         try {
-            JSONParser analysisParser = new JSONParser();
-            JSONObject salesAnalytics = (JSONObject) analysisParser.parse(new FileReader("salesAnalytics.json"));
-            JSONObject saleData = new JSONObject();
-            saleData.put("productId", this.productID);
-            saleData.put("quantitySold", quantitySold);
-            saleData.put("totalSalePrice", this.salePrice * quantitySold);
-            salesAnalytics.put(System.currentTimeMillis(), saleData); // Using current time as a unique sale identifier
+            JSONObject branchStock = (JSONObject) stockParser.parse(new FileReader("branchStock.json"));
+            JSONArray products = (JSONArray) branchStock.get("products");
+
+            // Iterate over products to find the matching productID
+            for (Object productObj : products) {
+                JSONObject product = (JSONObject) productObj;
+                if (product.get("productID").equals(this.productID)) {
+                    JSONArray branches = (JSONArray) product.get("branches");
+
+                    // Iterate over branches to find the matching branchID
+                    for (Object branchObj : branches) {
+                        JSONObject branch = (JSONObject) branchObj;
+                        if (branch.get("branchID").equals(branchId)) {
+                            int currentQuantity = ((Long) branch.get("quantity")).intValue();
+                            branch.put("quantity", currentQuantity + quantityAdded);
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            // Save the updated JSON back to the file
+            FileWriter file = new FileWriter("branchStock.json");
+            file.write(branchStock.toJSONString());
+            file.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void addPurchaseToSalesAnalytics(int quantitySold, String branchId){
+        // Load the salesAnalytics.json file
+        JSONParser parser = new JSONParser();
+        try {
+            JSONObject salesAnalytics = (JSONObject) parser.parse(new FileReader("salesAnalytics.json"));
+            JSONArray sales = (JSONArray) salesAnalytics.get("sales");
+
+            // Create a new sale entry
+            JSONObject newSale = new JSONObject();
+            newSale.put("productID", this.productID);
+            newSale.put("branchID", branchId);
+            newSale.put("quantitySold", quantitySold);
+            newSale.put("salePrice", this.salePrice);
+            newSale.put("totalAmount", this.salePrice * quantitySold);
+
+            // Add date-time for the sale
+            LocalDateTime now = LocalDateTime.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            newSale.put("dateTime", now.format(formatter));
+
+            // Add timestamp for the sale
+            Instant instant = now.atZone(ZoneId.systemDefault()).toInstant();
+            long timestamp = instant.getEpochSecond();
+            newSale.put("timestamp", timestamp);
+
+            // Add the new sale to the sales array
+            sales.add(newSale);
+
+            // Save the updated JSON back to the file
             FileWriter file = new FileWriter("salesAnalytics.json");
             file.write(salesAnalytics.toJSONString());
             file.close();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
     public void sellProduct(int quantitySold, String branchId) {
         // Update branchStock.json
         this.updateBranchStockAfterSale(quantitySold, branchId);
         // Update salesAnalytics.json
-        this.updateSalesAnalyticsAfterSale(quantitySold, branchId);
+        this.addPurchaseToSalesAnalytics(quantitySold, branchId);
     }
 
 }
