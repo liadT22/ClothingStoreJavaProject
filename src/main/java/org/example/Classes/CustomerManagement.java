@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class CustomerManagement {
@@ -37,17 +38,20 @@ public class CustomerManagement {
     }
 
     public void addCustomer(Customer customer) throws FileNotFoundException, JsonProcessingException {
-        if(this.customers.contains(customer)){
-            throw new RuntimeException("Customer is already in the system");
-        } else{
-          this.customers.add(customer);
-          PrintWriter pw = new PrintWriter(this.customerFile);
-          ObjectMapper objectMapper = new ObjectMapper();
-          String Json = new Gson().toJson(this.customers);
-          System.out.println(Json);
-          pw.print(Json);
-          pw.close();
+        for (int i = 0; i < this.customers.size(); i++) {
+            String str1 = this.customers.get(i).getCustomerID();
+            String str2 = customer.getCustomerID();
+            if (Objects.equals(str1, str2)) {
+                throw new RuntimeException("Customer is already in the dataBase");
+            }
         }
+        this.customers.add(customer);
+        PrintWriter pw = new PrintWriter(this.customerFile);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String Json = new Gson().toJson(this.customers);
+        System.out.println(Json);
+        pw.print(Json);
+        pw.close();
     }
 
     public void updateCustomer(Customer customer){

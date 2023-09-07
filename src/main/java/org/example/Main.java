@@ -32,16 +32,16 @@ public class Main {
             System.out.println(object.getName());
             list1.add(object);
         }
-        CustomerManagement customeManage = new CustomerManagement();
-//        Customer Inbar = new Customer("1","Inbar","1","1",CustomerType.NEW);
-//        Customer Inbar1 = new Customer("2","Inbar1","1","1",CustomerType.NEW);
-//        Customer Inbar2 = new Customer("3","Inbar2","1","1",CustomerType.NEW);
-//        try{
-//            customeManage.addCustomer(Inbar);
-//            customeManage.addCustomer(Inbar1);
-//            customeManage.addCustomer(Inbar2);
-//        } catch (FileNotFoundException e) {
-//            System.out.println(e.getMessage());
-//        }
+        CustomerManagement customManage = new CustomerManagement();
+        Customer Inbar = new Customer("1","Inbar","1","1",CustomerType.NEW);
+        Customer Inbar1 = new Customer("2","Inbar1","1","1",CustomerType.NEW);
+        Customer Inbar2 = new Customer("3","Inbar2","1","1",CustomerType.NEW);
+        try{
+            customManage.addCustomer(Inbar);
+            customManage.addCustomer(Inbar1);
+            customManage.addCustomer(Inbar2);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 }
