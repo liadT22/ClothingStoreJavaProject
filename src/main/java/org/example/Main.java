@@ -11,11 +11,12 @@ import org.example.Classes.EmployeeManagement;
 import org.example.Classes.Enum.CustomerType;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
-    public static void main(String[] args) throws JsonProcessingException, FileNotFoundException {
+    public static void main(String[] args) throws IOException {
         Employee Liad= new Employee("1", "Liad", "111", "1", "1", "1", "1");
         Employee Liad1 = new Employee("2", "Liad1", "111", "1", "1", "1", "1");
         List<Employee> list = new ArrayList<>();

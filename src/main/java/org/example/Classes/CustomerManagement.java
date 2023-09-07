@@ -8,6 +8,7 @@ import org.example.Classes.Enum.CustomerType;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,9 +19,10 @@ public class CustomerManagement {
 
     private File customerFile;
 
-    public CustomerManagement() throws FileNotFoundException, JsonProcessingException {
+    public CustomerManagement() throws IOException {
         this.customers = new ArrayList<>();
         this.customerFile =  new File("C:\\temp\\customers.txt");
+        this.customerFile.createNewFile();
         Scanner s = new Scanner(this.customerFile);
         if(s.hasNext()){
             String json = s.nextLine();
