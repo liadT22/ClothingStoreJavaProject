@@ -22,12 +22,14 @@ public class CustomerManagement {
         this.customers = new ArrayList<>();
         this.customerFile =  new File("C:\\temp\\customers.txt");
         Scanner s = new Scanner(this.customerFile);
-        String json = s.nextLine();
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonArray = objectMapper.readTree(json);
-        for (JsonNode element : jsonArray) {
-            Customer object = objectMapper.treeToValue(element, Customer.class);
-            this.customers.add(object);
+        if(s.hasNext()){
+            String json = s.nextLine();
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonArray = objectMapper.readTree(json);
+            for (JsonNode element : jsonArray) {
+                Customer object = objectMapper.treeToValue(element, Customer.class);
+                this.customers.add(object);
+            }
         }
         s.close();
     }
