@@ -18,6 +18,7 @@ public class Main {
         // CustomerManagement customManage = new CustomerManagement();
         Employee e1 = new Employee("123", "Tamara Slouzky", "1", "0532747988", "tamara", "1234", EmployeeType.CASHIER);
         Employee e2 = new Employee("124", "Israel Israeli", "1", "0522747988", "Is123", "5555", EmployeeType.FLOOR);
+         Manager m = new Manager("1", "Manager", "1", "0502747988", "Mm123", "987");
         // Customer Inbar = new Customer("1","Inbar","1","1",CustomerType.NEW);
         // Customer Inbar1 = new Customer("2","Inbar1","1","1",CustomerType.NEW);
         // Customer Inbar2 = new Customer("3","Inbar2","1","1",CustomerType.NEW);
@@ -33,15 +34,16 @@ public class Main {
             // System.out.println(customManage.getCustomerDetails("2").getName());
             // System.out.println(customManage.getCustomerDetails("3").getName());
             em.addEmployee(e1);
+            em.addEmployee(m);
             em.addEmployee(e2);
 
-            // Manager m = new Manager("1", "Manager", "1", "0502747988", "Mm123", "987");
+           
             // System.out.println("m" + m.toString());
             // em.addEmployee(m);
 
             // em.deleteEmployee("124");
-             Employee e3 = new Employee("123", "Tamara Slouzky", "1", "0532747988", "tamara", "1234", EmployeeType.FLOOR);
-            em.updateEmployee(e3);
+            //  Employee e3 = new Employee("123", "Tamara Slouzky", "1", "0532747988", "tamara", "1234", EmployeeType.FLOOR);
+            // em.updateEmployee(e3);
             // em.addEmployee(e2);
         } catch (Exception e) {
             System.out.println(e.getMessage());

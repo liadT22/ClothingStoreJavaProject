@@ -25,8 +25,19 @@ public class EmployeeManagement {
             if (employeesJSON != null) {
                 JsonNode jsonArray = objectMapper.readTree(employeesJSON);
                 for (JsonNode element : jsonArray) {
-                    Employee object = objectMapper.treeToValue(element, Employee.class);
-                    employees.add(object);
+                    JsonNode isAdminNode = element.get("isAdmin");
+                    System.out.println(isAdminNode);
+                    Employee object;
+                    if (isAdminNode != null && isAdminNode.isBoolean()) {
+                        if (isAdminNode.asBoolean()) {
+                            object = objectMapper.treeToValue(element, Manager.class);
+                        } else {
+                            object = objectMapper.treeToValue(element, Employee.class);
+                        }
+                        System.out.println(object);
+                        employees.add(object);
+                    }
+
                 }
             }
             return employees;
