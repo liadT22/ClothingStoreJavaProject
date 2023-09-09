@@ -1,23 +1,44 @@
 package org.example.Classes;
 
+import org.example.Classes.Enum.EmployeeType;
+
 public class Employee {
+    // שם עובד, תז, מספר סניף, סיסמה, האם אדמין, מספר חשבון, תפקיד
     private String employeeID;
     private String name;
-    private String ssn;
-    private String phone;
+    private String branchID;
+    private String phoneNumber;
+    private String password;
     private String accountNumber;
-    private String branch;
-    private String position;
+    private EmployeeType position;
+    private boolean isAdmin;
+
+    private boolean isAdminPosition(EmployeeType position){
+        if(position==EmployeeType.BRANCH_MANAGER){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+    
 
     public Employee(){}
-    public Employee(String employeeID, String name, String ssn, String phone, String accountNumber, String branch, String position){
+    public Employee(String employeeID,
+    String name,
+    String branchID,
+    String phoneNumber,
+    String password,
+    String accountNumber,
+    EmployeeType position){
         this.employeeID = employeeID;
         this.name = name;
-        this.ssn = ssn;
-        this.phone = phone;
-        this.accountNumber = accountNumber;
-        this.branch = branch;
+        this.branchID = branchID;
+        this.phoneNumber = phoneNumber;
+        this.password=password;
+        this.accountNumber=accountNumber;
         this.position = position;
+       this.isAdmin=isAdminPosition(position);
     }
 
     public String getEmployeeID(){
@@ -34,13 +55,41 @@ public class Employee {
 
     public void setName(String name){this.name = name;}
 
-    public void setSsn(String ssn){this.ssn = ssn;}
+    
+    public String getBranchID(){
+        return this.branchID;
+    }
+    public void setBranchID(String branchID){this.branchID = branchID;}
 
-    public void setPhone(String phone){this.phone = phone;}
+    public String getPhoneNumber(){
+        return this.phoneNumber;
+    }
 
-    public void setAccountNumber(String accountNumber){this.accountNumber = accountNumber;}
+    public void setPhoneNumber(String phone){this.phoneNumber = phone;}
 
-    public void setBranch(String branch){this.branch = branch;}
+    public String getPassword(){
+        return this.password;
+    }
 
-    public void setPosition(String position){this.position = position;}
+    public void setPassword(String password){ this.password=password;}
+
+    public String getAccountNumber(){
+        return this.accountNumber;
+    }
+
+    public void setAccountNumber(String accountNumber){ this.accountNumber=accountNumber;}
+
+    public EmployeeType getPosition(){
+        return this.position;
+    }
+
+    public boolean getIsAdmin(){
+        return this.isAdmin;
+    }
+
+    public void setPosition(EmployeeType position){
+        this.position = position;
+        this.isAdmin = isAdminPosition(position);
+        
+    }
 }

@@ -17,8 +17,8 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        Employee Liad= new Employee("1", "Liad", "111", "1", "1", "1", "1");
-        Employee Liad1 = new Employee("2", "Liad1", "111", "1", "1", "1", "1");
+        Employee Liad= new Employee();
+        Employee Liad1 = new Employee();
         List<Employee> list = new ArrayList<>();
         list.add(Liad);
         list.add(Liad1);
