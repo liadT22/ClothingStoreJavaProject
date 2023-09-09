@@ -1,4 +1,4 @@
-package org.example.Classes;
+package org.example.Classes.Employees;
 
 import org.example.Classes.Enum.EmployeeType;
 
@@ -91,6 +91,17 @@ public class Employee {
         this.position = position;
         this.isAdmin = isAdminPosition(position);
         
+    }
+
+    @Override
+    public String toString() {
+        return  "employeeID: "+this.employeeID+"\n"+
+        "name: "+this.name+"\n"+
+        "branchID: "+this.branchID+"\n"+
+        "phoneNumber: "+this.phoneNumber+"\n"+
+        "password: "+this.password+"\n"+
+        "accountNumber: "+this.accountNumber+"\n"+
+        "position: "+this.position ;
     }
 
     //modify files for admin
