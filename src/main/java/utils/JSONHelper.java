@@ -47,10 +47,6 @@ public class JSONHelper {
         }
     }
 
-    private static File getFile(String fileName){
-        return new File(DIRECTORY_PATH + fileName);
-    }
-
     public static String readFile(String fileName) throws FileNotFoundException {
         File file = new File(DIRECTORY_PATH + fileName);
         String json = "";

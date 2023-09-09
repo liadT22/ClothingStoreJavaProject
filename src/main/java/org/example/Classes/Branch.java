@@ -3,6 +3,8 @@ package org.example.Classes;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.example.Classes.Employees.Employee;
+
 public class Branch {
     private String branchID;
     private String location;
