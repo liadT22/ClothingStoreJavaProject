@@ -22,13 +22,13 @@ public class EmployeeManagement {
             String employeesJSON = JSONHelper.readFile("employees.json");
             List<Employee> employees = new ArrayList<Employee>();
             ObjectMapper objectMapper = new ObjectMapper();
-            // if (employeesJSON != null) {
+            if (employeesJSON != null) {
             JsonNode jsonArray = objectMapper.readTree(employeesJSON);
             for (JsonNode element : jsonArray) {
                 Employee object = objectMapper.treeToValue(element, Employee.class);
                 employees.add(object);
             }
-            // }
+            }
             return employees;
 
         } catch (FileNotFoundException e) {
@@ -60,7 +60,7 @@ public class EmployeeManagement {
                 }
             }
         } else {
-            employees = new ArrayList<Employee>(null);
+            employees = new ArrayList<Employee>();
         }
         employees.add(employee);
         String json = new Gson().toJson(employees);
