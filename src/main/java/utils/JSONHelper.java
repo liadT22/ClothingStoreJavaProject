@@ -1,13 +1,17 @@
 package utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.example.Classes.Customer;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -61,9 +65,12 @@ public class JSONHelper {
     public static void writeToFile(String json, String fileName) throws FileNotFoundException {
         File file = new File(DIRECTORY_PATH + fileName);
         PrintWriter pw = new PrintWriter(file);
-        pw.flush();
         pw.print(json);
         pw.close();
+    }
+
+    public static <T> String convertListToJson(List<T> customers){
+        return new Gson().toJson(customers);
     }
 
 }

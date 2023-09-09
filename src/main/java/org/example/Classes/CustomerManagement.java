@@ -20,9 +20,7 @@ public class CustomerManagement {
     private List<Customer> customers;
 
     private void writeToFile() throws FileNotFoundException {
-        String json = new Gson().toJson(this.customers);
-        JSONHelper.writeToFile(json, "customers.json");
-        System.out.println(json);
+        JSONHelper.writeToFile(JSONHelper.convertListToJson(this.customers), "customers.json");
     }
 
     private void readFile() throws JsonProcessingException, FileNotFoundException {
