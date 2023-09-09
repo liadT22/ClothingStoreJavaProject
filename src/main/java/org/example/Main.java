@@ -27,7 +27,6 @@ public class Main {
             customManage.updateCustomer(newInbar);
             customManage.deleteCustomer("2");
             System.out.println(customManage.getCustomerDetails("1").getName());
-            System.out.println(customManage.getCustomerDetails("2").getName());
             System.out.println(customManage.getCustomerDetails("3").getName());
         } catch (Exception e) {
             System.out.println(e.getMessage());
