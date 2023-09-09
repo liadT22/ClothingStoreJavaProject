@@ -17,17 +17,17 @@ public class EmployeeManagement {
     public EmployeeManagement() {
     }
 
-    private List<Employee> getEmployeesFromFile() {
+    public List<Employee> getEmployeesFromFile() {
         try {
             String employeesJSON = JSONHelper.readFile("employees.json");
             List<Employee> employees = new ArrayList<Employee>();
             ObjectMapper objectMapper = new ObjectMapper();
             if (employeesJSON != null) {
-            JsonNode jsonArray = objectMapper.readTree(employeesJSON);
-            for (JsonNode element : jsonArray) {
-                Employee object = objectMapper.treeToValue(element, Employee.class);
-                employees.add(object);
-            }
+                JsonNode jsonArray = objectMapper.readTree(employeesJSON);
+                for (JsonNode element : jsonArray) {
+                    Employee object = objectMapper.treeToValue(element, Employee.class);
+                    employees.add(object);
+                }
             }
             return employees;
 
@@ -73,31 +73,73 @@ public class EmployeeManagement {
     }
 
     public void updateEmployee(Employee employee) {
-        try {
-            String employeesJSON = JSONHelper.readFile("employees.json");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        List<Employee> employees = getEmployeesFromFile();
+        int i = 0;
+        boolean isUserFound = false;
+        if (employees != null) {
+            while (i < employees.size() && !isUserFound) {
+                if (Objects.equals(employees.get(i).getEmployeeID(), employee.getEmployeeID())) {
+                    employees.remove(i);
+                    isUserFound = true;
+                }
+                i++;
+            }
+        } else {
+            employees = new ArrayList<Employee>();
         }
-
-        // find by id
-        // write to json file with json helper
+        if (isUserFound) {
+            employees.add(employee);
+            String json = new Gson().toJson(employees);
+            try {
+                JSONHelper.writeToFile(json, "employees.json");
+            } catch (FileNotFoundException e) {
+                System.out.println(e.getMessage());
+            }
+        } else {
+            System.out.println("Could not find user to update");
+        }
 
     }
 
     public void deleteEmployee(String employeeID) {
-        // for (int i = 0; i < this.employees.size(); i++) {
-        // if (this.employees.get(i).getEmployeeID() == employeeID) {
-        // this.employees.remove(i);
-        // }
-        // }
+        List<Employee> employees = getEmployeesFromFile();
+        int i = 0;
+        boolean isUserFound = false;
+        System.out.println("employees.length" + employees.size());
+        if (employees != null) {
+            while (i < employees.size() && !isUserFound) {
+                if (Objects.equals(employees.get(i).getEmployeeID(), employeeID)) {
+                    employees.remove(i);
+                    isUserFound = true;
+                }
+                i++;
+            }
+            System.out.println("employees.length2" + employees.size());
+            if (isUserFound) {
+                String json = new Gson().toJson(employees);
+                try {
+                    JSONHelper.writeToFile(json, "employees.json");
+                } catch (FileNotFoundException e) {
+                    System.out.println(e.getMessage());
+                }
+            }
+        }
+        System.out.println("Could not find user to delete");
+
     }
 
     public Employee getEmployeeDetails(String employeeID) {
-        // for (int i = 0; i < this.employees.size(); i++) {
-        // if (this.employees.get(i).getEmployeeID() == employeeID) {
-        // return this.employees.get(i);
-        // }
-        // }
-        throw new RuntimeException("Employee " + employeeID + " does not exist");
+        List<Employee> employees = getEmployeesFromFile();
+        int i = 0;
+        if (employees != null) {
+            while (i < employees.size()) {
+                if (Objects.equals(employees.get(i).getEmployeeID(), employeeID)) {
+                    return employees.get(i);
+                }
+                i++;
+            }
+        }
+        System.out.println("Could not find user with this ID");
+        return null;
     }
 }
