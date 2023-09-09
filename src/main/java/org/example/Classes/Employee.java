@@ -14,7 +14,7 @@ public class Employee {
     private boolean isAdmin;
 
     private boolean isAdminPosition(EmployeeType position){
-        if(position==EmployeeType.BRANCH_MANAGER){
+        if(position==EmployeeType.SHIFT_SUPERVISOR){
             return true;
         }
         else{
@@ -92,4 +92,6 @@ public class Employee {
         this.isAdmin = isAdminPosition(position);
         
     }
+
+    //modify files for admin
 }

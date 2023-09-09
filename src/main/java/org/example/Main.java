@@ -1,16 +1,11 @@
 package org.example;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.example.Classes.Customer;
 import org.example.Classes.CustomerManagement;
 import org.example.Classes.Employee;
-import org.example.Classes.EmployeeManagement;
 import org.example.Classes.Enum.CustomerType;
-
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +19,7 @@ public class Main {
         list.add(Liad1);
         ObjectMapper objectMapper = new ObjectMapper();
         String Json = new Gson().toJson(list);
-        System.out.println(Json);
+        System.out.println("Json"+Json);
         JsonNode jsonArray = objectMapper.readTree(Json);
         List<Employee> list1 = new ArrayList<>();
         for (JsonNode element : jsonArray) {

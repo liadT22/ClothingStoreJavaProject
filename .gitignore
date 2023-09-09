@@ -31,4 +31,4 @@ buildNumber.properties
 *.vsix
 
 .idea/
-
+src/main/resources/

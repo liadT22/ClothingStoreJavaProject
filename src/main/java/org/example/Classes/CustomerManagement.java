@@ -22,19 +22,19 @@ public class CustomerManagement {
 
     public CustomerManagement() throws IOException {
         this.customers = new ArrayList<>();
-        this.customerFile =  new File("C:\\temp\\customers.txt");
-        this.customerFile.createNewFile();
-        Scanner s = new Scanner(this.customerFile);
-        if(s.hasNext()){
-            String json = s.nextLine();
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode jsonArray = objectMapper.readTree(json);
-            for (JsonNode element : jsonArray) {
-                Customer object = objectMapper.treeToValue(element, Customer.class);
-                this.customers.add(object);
-            }
-        }
-        s.close();
+        // this.customerFile =  new File("C:\\temp\\customers.txt");
+        // this.customerFile.createNewFile();
+        // Scanner s = new Scanner(this.customerFile);
+        // if(s.hasNext()){
+        //     String json = s.nextLine();
+        //     ObjectMapper objectMapper = new ObjectMapper();
+        //     JsonNode jsonArray = objectMapper.readTree(json);
+        //     for (JsonNode element : jsonArray) {
+        //         Customer object = objectMapper.treeToValue(element, Customer.class);
+        //         this.customers.add(object);
+        //     }
+        // }
+        // s.close();
     }
 
     public void addCustomer(Customer customer) throws FileNotFoundException, JsonProcessingException {

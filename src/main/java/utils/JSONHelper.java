@@ -11,8 +11,7 @@ public class JSONHelper {
         checkAndCreateFile("salesAnalytics.json");
         checkAndCreateFile("employees.json");
         checkAndCreateFile("branchesData.json");
-
-        // Add other necessary files here...
+        checkAndCreateFile("customers.json");
     }
 
     private static void checkAndCreateFile(String filename) {
