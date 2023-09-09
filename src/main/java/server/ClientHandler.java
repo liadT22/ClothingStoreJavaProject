@@ -1,13 +1,25 @@
 package server;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import org.example.Classes.Employee;
+import org.example.Classes.Enum.EmployeeType;
+import shared.*;
+import shared.Commands;
+import utils.JSONHelper;
+
+import java.io.*;
 import java.net.Socket;
+import java.util.InputMismatchException;
+import java.util.List;
+import java.util.Scanner;
 
 class ClientHandler implements Runnable {
 
     private Socket clientSocket;
+    private ObjectOutputStream outputStream;
+    private ObjectInputStream inputStream;
+    private EmployeeType loggedInUserType;
+
+
 
     public ClientHandler(Socket clientSocket) {
         this.clientSocket = clientSocket;
@@ -15,27 +27,72 @@ class ClientHandler implements Runnable {
 
     @Override
     public void run() {
-        try (
-                InputStream input = clientSocket.getInputStream();
-                OutputStream output = clientSocket.getOutputStream()
-        ) {
-            // Handle client communication
-            // For simplicity, we'll just read data sent by the client and echo it back
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = input.read(buffer)) != -1) {
-                output.write(buffer, 0, bytesRead);
-                output.flush();
-            }
-
-        } catch (IOException e) {
-            System.out.println("Error handling client: " + e.getMessage());
-        } finally {
+        while (true) {
             try {
-                clientSocket.close();
-            } catch (IOException e) {
-                System.out.println("Error closing client socket: " + e.getMessage());
+                String command = (String) inputStream.readObject();
+                switch (command) {
+                    case Commands.LOGIN:
+                        handleLogin();
+                        break;
+                    case Commands.FETCH_EMPLOYEES:
+                        handleFetchEmployees();
+                        break;
+                    case Commands.UPDATE_EMPLOYEES:
+                        handleUpdateEmployees();
+                        break;
+                    case Commands.UPDATE_INVENTORY:
+                        handleUpdateInventory();
+                        break;
+                    case Commands.FETCH_INVENTORY:
+                        handleFetchInventory();
+                        break;
+                    // ... other command handlers
+                    default:
+                        System.out.println("Unknown command received.");
+                }
+            } catch (Exception e) {
+                System.out.println("Error processing command: " + e.getMessage());
+            } finally {
+                try {
+                    clientSocket.close();
+                } catch (IOException e) {
+                    System.out.println("Error closing client socket: " + e.getMessage());
+                }
             }
         }
     }
+
+    private void handleFetchInventory() {
+    }
+
+    private void handleUpdateInventory() {
+    }
+
+    private void handleUpdateEmployees() {
+    }
+
+    private void handleFetchEmployees() {
+    }
+
+    private void handleLogin() throws IOException, ClassNotFoundException {
+        String username = (String) inputStream.readObject();
+        String password = (String) inputStream.readObject();
+
+        boolean isValid = validateCredentials(username, password);
+        outputStream.writeObject(isValid);
+    }
+
+    private boolean validateCredentials(String username, String password) {
+//        // Fetch employee data from employees.json using JSONHelper
+//        List<Employee> employees = JSONHelper.readEmployeesFromJSON();
+//
+//        for (Employee employee : employees) {
+//            if (employee.getUsername().equals(username) && employee.getPassword().equals(password)) {
+//                return true; // Credentials are valid
+//            }
+//        }
+        return false; // Credentials are invalid
+    }
+
+
 }
