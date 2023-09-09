@@ -1,6 +1,16 @@
 package utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.Classes.Customer;
+
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
 public class JSONHelper {
     private static final String DIRECTORY_PATH = "src/main/resources/";
@@ -32,4 +42,28 @@ public class JSONHelper {
             System.out.println(filename + " already exists in " + DIRECTORY_PATH);
         }
     }
+
+    private static File getFile(String fileName){
+        return new File(DIRECTORY_PATH + fileName);
+    }
+
+    public static String readFile(String fileName) throws FileNotFoundException {
+        File file = new File(DIRECTORY_PATH + fileName);
+        String json = "";
+        Scanner s = new Scanner(file);
+        if(s.hasNext()) {
+            json = s.nextLine();
+        }
+        s.close();
+        return json;
+    }
+
+    public static void writeToFile(String json, String fileName) throws FileNotFoundException {
+        File file = new File(DIRECTORY_PATH + fileName);
+        PrintWriter pw = new PrintWriter(file);
+        pw.flush();
+        pw.print(json);
+        pw.close();
+    }
+
 }
