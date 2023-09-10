@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.util.Scanner;
 
 import org.example.Classes.Employees.Employee;
+import org.example.Classes.Enum.EmployeeType;
 
 public class Client {
 
@@ -13,12 +14,52 @@ public class Client {
     private Socket socket;
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
-    private String branchId;
     private Employee loggedInEmployee;
 
     public Client(String serverAddress, int serverPort) {
         this.serverAddress = serverAddress;
         this.serverPort = serverPort;
+    }
+
+    public Object handleServerResponse() {
+        try {
+            return inputStream.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public void sendDataToServer(Object data) {
+        try {
+            outputStream.writeObject(data);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void startClientSession() throws IOException, ClassNotFoundException {
+        connectToServer();
+
+        int loginAttempts = 3;
+        boolean loggedIn = false;
+
+        while (loginAttempts > 0 && !loggedIn) {
+            loggedIn = login();
+            if (!loggedIn) {
+                loginAttempts--;
+                if (loginAttempts > 0) {
+                    System.out.println(loginAttempts + " attempts remaining.");
+                }
+            }
+        }
+
+        if (loggedIn) {
+            displayMenu();
+        } else {
+            System.out.println("Exiting due to multiple failed login attempts.");
+            closeSession();
+        }
     }
 
     public void connectToServer() throws IOException {
@@ -51,11 +92,11 @@ public class Client {
         outputStream.writeObject("LOGIN");
 
         // Send credentials to the server for validation
-        outputStream.writeObject(ID);
-        outputStream.writeObject(password);
+        sendDataToServer(ID);
+        sendDataToServer(password);
 
         // Receive the response from the server
-        loggedInEmployee = (Employee) inputStream.readObject();
+        loggedInEmployee = (Employee) handleServerResponse();
 
         if (loggedInEmployee != null) {
             System.out.println("Login successful!");
@@ -64,6 +105,12 @@ public class Client {
             System.out.println("Login failed. Please try again.");
             return false;
         }
+    }
+
+    public void closeSession() throws IOException {
+        outputStream.close();
+        inputStream.close();
+        socket.close();
     }
 
     public void displayMenu() throws IOException {
@@ -89,25 +136,31 @@ public class Client {
     }
 
     private void displayFloorMenu() {
-        System.out.println("1. View Products");
-        System.out.println("2. Check Inventory");
-        System.out.println("3. Logout");
+        System.out.println("1. View Product");
+        System.out.println("2. Manage Customers");
+        System.out.println("3. Fetch Inventory");
+        System.out.println("4. Start Chat");
+        System.out.println("5. Logout");
     }
 
     private void displayCashierMenu() {
-        System.out.println("1. View Products");
-        System.out.println("2. Check Inventory");
-        System.out.println("3. Process Sale");
-        System.out.println("4. Logout");
+        System.out.println("1. View Product");
+        System.out.println("2. Manage Customers");
+        System.out.println("3. Fetch Inventory");
+        System.out.println("4. Process Sale");
+        System.out.println("5. Start Chat");
+        System.out.println("6. Logout");
     }
 
     private void displayShiftSupervisorMenu() {
-        System.out.println("1. View Products");
-        System.out.println("2. Check Inventory");
-        System.out.println("3. Process Sale");
-        System.out.println("4. View Sales Report");
-        System.out.println("5. Manage Employees");
-        System.out.println("6. Logout");
+        System.out.println("1. View Product");
+        System.out.println("2. Manage Customers");
+        System.out.println("3. Fetch Inventory");
+        System.out.println("4. Process Sale");
+        System.out.println("5. View Sales Report");
+        System.out.println("6. Manage Employees");
+        System.out.println("7. Start Chat");
+        System.out.println("8. Logout");
     }
 
     private void handleMenuChoice(int choice) throws IOException {
@@ -166,18 +219,23 @@ public class Client {
                 // View Products
                 break;
             case 2:
-                // Check Inventory
+                // Manage Customers
                 break;
             case 3:
-                // Process Sale
+                // Check Inventory
                 break;
             case 4:
-                // View Sales Report
+                // Process Sale
                 break;
             case 5:
-                // Manage Employees
+                // View Sales Report
+                manageSalesReports();
                 break;
             case 6:
+                // Manage Employees
+                manageEmployees();
+                break;
+            case 7:
                 // Logout
                 logout();
                 break;
@@ -186,66 +244,138 @@ public class Client {
         }
     }
 
+    private void manageSalesReports() {
+        System.out.println("\n--- Sales Reports ---");
+        System.out.println("1. Sales By Branch");
+        System.out.println("2. Sales By Product");
+        System.out.println("3. Sales By Category");
+        System.out.println("4. Back");
+        System.out.print("\nEnter your choice: ");
+        Scanner scanner = new Scanner(System.in);
+        int choice = scanner.nextInt();
+        handleSalesReportsChoice(choice);
+    }
+
+    private void handleSalesReportsChoice(int choice) {
+        switch (choice) {
+            case 1:
+                // Sales By Branch
+                break;
+            case 2:
+                // Sales By Product
+                break;
+            case 3:
+                // Sales By Category
+                break;
+            case 4:
+                // Back
+                break;
+            default:
+                System.out.println("Invalid choice.");
+        }
+    }
+
+    private void manageEmployees() {
+        System.out.println("\n--- Manage Employees ---");
+        System.out.println("1. Fetch Employees");
+        System.out.println("2. Add Employee");
+        System.out.println("3. Update Employee");
+        System.out.println("4. Back");
+        System.out.print("\nEnter your choice: ");
+        Scanner scanner = new Scanner(System.in);
+        int choice = scanner.nextInt();
+        handleManageEmployeesChoice(choice);
+    }
+
+    private void handleManageEmployeesChoice(int choice) {
+        switch (choice) {
+            case 1:
+                // Fetch Employees
+                break;
+            case 2:
+                // Add Employee
+                addNewEmployee();
+                break;
+            case 3:
+                // Update Employee
+                break;
+            case 4:
+                // Back
+                break;
+            default:
+                System.out.println("Invalid choice.");
+        }
+    }
+
+    private void addNewEmployee() {
+        Employee newEmployee = new Employee();
+        System.out.println("Enter New Employee Data:");
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("ID:");
+        newEmployee.setEmployeeID(scanner.nextLine());
+
+        System.out.println("Name:");
+        newEmployee.setName(scanner.nextLine());
+
+        System.out.println("BranchID:");
+        newEmployee.setBranchID(scanner.nextLine());
+
+        System.out.println("Phone Number:");
+        newEmployee.setPhoneNumber(scanner.nextLine());
+
+        // For password without displaying in console
+        Console console = System.console();
+        if (console != null) {
+            char[] passwordArray = console.readPassword("Password: ");
+            newEmployee.setPassword(new String(passwordArray));
+        } else {
+            System.out.print("Password: ");
+            newEmployee.setPassword(scanner.nextLine());
+        }
+
+        System.out.println("Account Number:");
+        newEmployee.setAccountNumber(scanner.nextLine());
+
+        while (true) {
+            System.out.println("Position (1.Floor; 2.Cashier; 3.Shift Manager):");
+            String positionCode = scanner.nextLine();
+
+            switch (positionCode) {
+                case "1":
+                    newEmployee.setPosition(EmployeeType.FLOOR);
+                    break;
+                case "2":
+                    newEmployee.setPosition(EmployeeType.CASHIER);
+                    break;
+                case "3":
+                    newEmployee.setPosition(EmployeeType.SHIFT_SUPERVISOR);
+                    break;
+                default:
+                    System.out.println("Wrong position input, try again.");
+                    continue;
+            }
+            break;
+        }
+
+        sendDataToServer("ADD_EMPLOYEE");
+        sendDataToServer(newEmployee);
+
+        // Receive the response from the server
+        boolean response = (boolean) handleServerResponse();
+        if (response) {
+            System.out.println("Employee added successfully");
+        } else {
+            System.out.println("Something didn't work, try again");
+        }
+    }
+
+
     private void logout() throws IOException {
         System.out.println("Logging out...");
         // Close connection, reset loggedInEmployee, etc.
+        this.loggedInEmployee = null;
         this.closeSession();
-    }
-    
-
-    private Employee sendLoginRequestToServer(String ID, String password) {
-        return new Employee();
-    }
-
-
-    public Object handleServerResponse() {
-        try {
-            return inputStream.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public void sendDataToServer(Object data) {
-        try {
-            outputStream.writeObject(data);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-
-    // ... Other methods like manageInventory(), manageCustomers(), viewReports(), etc.
-    public void startClientSession() throws IOException, ClassNotFoundException {
-        connectToServer();
-
-        int loginAttempts = 3;
-        boolean loggedIn = false;
-
-        while (loginAttempts > 0 && !loggedIn) {
-            loggedIn = login();
-            if (!loggedIn) {
-                loginAttempts--;
-                if (loginAttempts > 0) {
-                    System.out.println(loginAttempts + " attempts remaining.");
-                }
-            }
-        }
-
-        if (loggedIn) {
-            displayMenu();
-        } else {
-            System.out.println("Exiting due to multiple failed login attempts.");
-            closeSession();
-        }
-    }
-
-    public void closeSession() throws IOException {
-        outputStream.close();
-        inputStream.close();
-        socket.close();
     }
 
     public static void main(String[] args) {
