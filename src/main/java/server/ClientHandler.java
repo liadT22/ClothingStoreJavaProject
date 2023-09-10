@@ -20,9 +20,11 @@ class ClientHandler implements Runnable {
 
 
 
-    public ClientHandler(Socket clientSocket, Set<String> loggedInUsers) {
+    public ClientHandler(Socket clientSocket, Set<String> loggedInUsers) throws IOException {
         this.clientSocket = clientSocket;
         this.loggedInUsers = loggedInUsers;
+        outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
+        inputStream = new ObjectInputStream(clientSocket.getInputStream());
     }
 
     @Override
