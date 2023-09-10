@@ -2,12 +2,9 @@ package Client;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.InputMismatchException;
-import java.util.List;
 import java.util.Scanner;
 
-import org.example.Classes.Enum.EmployeeType;
-import shared.*;
+import org.example.Classes.Employees.Employee;
 
 public class Client {
 
@@ -17,16 +14,14 @@ public class Client {
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
     private String branchId;
-    private String employeeId;
-    private EmployeeType loggedInUserType;
-    private String loggedInEmployeeID;
+    private Employee loggedInEmployee;
 
     public Client(String serverAddress, int serverPort) {
         this.serverAddress = serverAddress;
         this.serverPort = serverPort;
     }
 
-    public void connectToServer() {
+    public void connectToServer() throws IOException {
         try {
             // Step 1: Create a socket and establish a connection to the server
             socket = new Socket(serverAddress, serverPort);
@@ -40,31 +35,30 @@ public class Client {
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Error connecting to the server.");
+            closeSession();
         }
     }
 
 
     public boolean login() throws IOException, ClassNotFoundException {
         Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter username: ");
-        String username = scanner.nextLine();
+        System.out.print("Enter ID: ");
+        String ID = scanner.nextLine();
         System.out.print("Enter password: ");
         String password = scanner.nextLine();
 
         // Send LOGIN command to the server
-        outputStream.writeObject(Commands.LOGIN);
+        outputStream.writeObject("LOGIN");
 
         // Send credentials to the server for validation
-        outputStream.writeObject(username);
+        outputStream.writeObject(ID);
         outputStream.writeObject(password);
 
-        // Send these credentials to the server for validation
-        loggedInEmployeeID = sendLoginRequestToServer(username, password);
+        // Receive the response from the server
+        loggedInEmployee = (Employee) inputStream.readObject();
 
-        if (loggedInEmployeeID != null) {
+        if (loggedInEmployee != null) {
             System.out.println("Login successful!");
-            // Here, you'd also get the user type from the server using the loggedInEmployeeID
-            loggedInUserType = getUserTypeFromServer(loggedInEmployeeID);
             return true;
         } else {
             System.out.println("Login failed. Please try again.");
@@ -72,16 +66,137 @@ public class Client {
         }
     }
 
-    private String sendLoginRequestToServer(String username, String password) {
-        return "a";
+    public void displayMenu() throws IOException {
+        while (true) {
+            System.out.println("\n--- MENU ---");
+            switch (loggedInEmployee.getPosition()) {
+                case FLOOR:
+                    displayFloorMenu();
+                    break;
+                case CASHIER:
+                    displayCashierMenu();
+                    break;
+                case SHIFT_SUPERVISOR:
+                    displayShiftSupervisorMenu();
+                    break;
+            }
+
+            System.out.print("\nEnter your choice: ");
+            Scanner scanner = new Scanner(System.in);
+            int choice = scanner.nextInt();
+            handleMenuChoice(choice);
+        }
     }
 
-    // This method sends a request to the server to get the user type
-    private EmployeeType getUserTypeFromServer(String username) {
-        // Logic to communicate with the server and fetch the user type
-        // For now, I'm just returning a dummy value. Replace this with actual server communication.
-        return EmployeeType.FLOOR;
+    private void displayFloorMenu() {
+        System.out.println("1. View Products");
+        System.out.println("2. Check Inventory");
+        System.out.println("3. Logout");
     }
+
+    private void displayCashierMenu() {
+        System.out.println("1. View Products");
+        System.out.println("2. Check Inventory");
+        System.out.println("3. Process Sale");
+        System.out.println("4. Logout");
+    }
+
+    private void displayShiftSupervisorMenu() {
+        System.out.println("1. View Products");
+        System.out.println("2. Check Inventory");
+        System.out.println("3. Process Sale");
+        System.out.println("4. View Sales Report");
+        System.out.println("5. Manage Employees");
+        System.out.println("6. Logout");
+    }
+
+    private void handleMenuChoice(int choice) throws IOException {
+        switch (loggedInEmployee.getPosition()) {
+            case FLOOR:
+                handleFloorChoice(choice);
+                break;
+            case CASHIER:
+                handleCashierChoice(choice);
+                break;
+            case SHIFT_SUPERVISOR:
+                handleShiftSupervisorChoice(choice);
+                break;
+        }
+    }
+
+    private void handleFloorChoice(int choice) throws IOException {
+        switch (choice) {
+            case 1:
+                // View Products
+                break;
+            case 2:
+                // Check Inventory
+                break;
+            case 3:
+                // Logout
+                logout();
+                break;
+            default:
+                System.out.println("Invalid choice. Please try again.");
+        }
+    }
+    private void handleCashierChoice(int choice) throws IOException {
+        switch (choice) {
+            case 1:
+                // View Products
+                break;
+            case 2:
+                // Check Inventory
+                break;
+            case 3:
+                // Process Sale
+                break;
+            case 4:
+                // Logout
+                logout();
+                break;
+            default:
+                System.out.println("Invalid choice. Please try again.");
+        }
+    }
+
+    private void handleShiftSupervisorChoice(int choice) throws IOException {
+        switch (choice) {
+            case 1:
+                // View Products
+                break;
+            case 2:
+                // Check Inventory
+                break;
+            case 3:
+                // Process Sale
+                break;
+            case 4:
+                // View Sales Report
+                break;
+            case 5:
+                // Manage Employees
+                break;
+            case 6:
+                // Logout
+                logout();
+                break;
+            default:
+                System.out.println("Invalid choice. Please try again.");
+        }
+    }
+
+    private void logout() throws IOException {
+        System.out.println("Logging out...");
+        // Close connection, reset loggedInEmployee, etc.
+        this.closeSession();
+    }
+    
+
+    private Employee sendLoginRequestToServer(String ID, String password) {
+        return new Employee();
+    }
+
 
     public Object handleServerResponse() {
         try {
@@ -100,76 +215,45 @@ public class Client {
         }
     }
 
-    private void displayMenu() {
-        while (true) {  // Keep displaying the menu until the user chooses to exit
-            List<String> availableActions = Permission.getPermissions().get(loggedInUserType);
-            System.out.println("\nChoose an action:");
-            for (int i = 0; i < availableActions.size(); i++) {
-                System.out.println((i + 1) + ". " + availableActions.get(i));
-            }
-            System.out.println((availableActions.size() + 1) + ". Exit");  // Add an option to exit
-
-            int choice = handleMenuChoice(availableActions);
-            if (choice == availableActions.size() + 1) {
-                System.out.println("Exiting...");
-                break;  // Exit the loop and end the session
-            } else {
-                executeAction(availableActions.get(choice - 1));
-            }
-        }
-    }
-
-    private int handleMenuChoice(List<String> availableActions) {
-        Scanner scanner = new Scanner(System.in);
-        int choice = -1;
-
-        while (choice < 1 || choice > availableActions.size() + 1) {
-            System.out.print("Enter your choice (1-" + (availableActions.size() + 1) + "): ");
-            try {
-                choice = scanner.nextInt();
-                if (choice < 1 || choice > availableActions.size() + 1) {
-                    System.out.println("Invalid choice. Please try again.");
-                }
-            } catch (InputMismatchException e) {
-                System.out.println("Please enter a valid number.");
-                scanner.next();  // Clear the invalid input
-            }
-        }
-        return choice;
-    }
-
-    private void executeAction(String action) {
-        switch (action) {
-            case "Add New Product":
-                // Call method to add new product
-                break;
-            case "Remove Product":
-                // Call method to remove product
-                break;
-            case "View Sales Report":
-                // Call method to view sales report
-                break;
-            case "Manage Employees":
-                // Call method to manage employees
-                break;
-            case "Chat with Branch":
-                // Call method to chat with another branch
-                break;
-            case "Logout":
-                // Call method to logout
-                break;
-            // ... handle other actions ...
-            default:
-                System.out.println("Unknown action.");
-        }
-    }
 
 
     // ... Other methods like manageInventory(), manageCustomers(), viewReports(), etc.
+    public void startClientSession() throws IOException, ClassNotFoundException {
+        connectToServer();
+
+        int loginAttempts = 3;
+        boolean loggedIn = false;
+
+        while (loginAttempts > 0 && !loggedIn) {
+            loggedIn = login();
+            if (!loggedIn) {
+                loginAttempts--;
+                if (loginAttempts > 0) {
+                    System.out.println(loginAttempts + " attempts remaining.");
+                }
+            }
+        }
+
+        if (loggedIn) {
+            displayMenu();
+        } else {
+            System.out.println("Exiting due to multiple failed login attempts.");
+            closeSession();
+        }
+    }
+
+    public void closeSession() throws IOException {
+        outputStream.close();
+        inputStream.close();
+        socket.close();
+    }
 
     public static void main(String[] args) {
         Client client = new Client("localhost", 8080);
-        client.connectToServer();
-        // ... Further logic like login, displaying menu, etc.
+        try {
+            client.startClientSession();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 }
