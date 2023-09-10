@@ -55,8 +55,8 @@ public class JSONHelper {
         pw.close();
     }
 
-    public static <T> String convertListToJson(List<T> customers){
-        return new Gson().toJson(customers);
+    public static <T> String convertListToJson(List<T> listItems){
+        return new Gson().toJson(listItems);
     }
 
 }

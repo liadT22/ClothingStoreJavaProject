@@ -9,6 +9,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import utils.JSONHelper;
 
@@ -73,10 +76,19 @@ public class EmployeeManagement {
         } else {
             employees = new ArrayList<Employee>();
         }
-        employees.add(employee);
+        String employeeJsonString = new Gson().toJson(employee);
+        JsonObject jsonObject = JsonParser.parseString(employeeJsonString).getAsJsonObject();
+        if (employee instanceof Manager) {
+            jsonObject.remove("employees");
+            jsonObject.remove("employeeManagement");
+        }
+
         String json = new Gson().toJson(employees);
+        JsonArray employeesArray = JsonParser.parseString(json).getAsJsonArray();
+        employeesArray.add(jsonObject);
+        String updatedEmployeesJson = employeesArray.toString();
         try {
-            JSONHelper.writeToFile(json, "employees.json");
+            JSONHelper.writeToFile(updatedEmployeesJson, "employees.json");
         } catch (FileNotFoundException e) {
             System.out.println(e.getMessage());
         }
