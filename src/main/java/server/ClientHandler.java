@@ -1,6 +1,5 @@
 package server;
 
-import org.example.Classes.Employee;
 import org.example.Classes.Enum.EmployeeType;
 import shared.*;
 import shared.Commands;
