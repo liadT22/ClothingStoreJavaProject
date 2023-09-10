@@ -1,5 +1,6 @@
 package org.example.Classes;
 
+import org.example.Classes.Enum.EproductCategory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -14,19 +15,17 @@ import java.time.format.DateTimeFormatter;
 public class Product {
     private String productID;
     private String name;
-    private ProductCategory productCategory;
+    private EproductCategory productCategory;
     private double price;
     private double salePrice;
 
 
     //Constructor
-    public Product(String productID, String name, ProductCategory productCategory, double price, int quantity, double salePrice) {
+    public Product(String productID, String name, EproductCategory productCategory, double price, int quantity) {
         this.productID = productID;
         this.name = name;
         this.productCategory = productCategory;
         this.price = price;
-        this.salePrice = salePrice;
-        this.addProductToCatalog();
     }
 
     //Getter and setters
@@ -54,11 +53,11 @@ public class Product {
         return price;
     }
 
-    public void setProductCategory(ProductCategory productCategory) {
+    public void setProductCategory(EproductCategory productCategory) {
         this.productCategory = productCategory;
     }
 
-    public ProductCategory getProductCategory() {
+    public EproductCategory getProductCategory() {
         return productCategory;
     }
 
@@ -97,63 +96,63 @@ public class Product {
         }
         return 0;  // Return 0 if product or branch not found
     }
-    private void addProductToCatalog() {
-        JSONParser parser = new JSONParser();
-        try {
-            JSONObject productsData = (JSONObject) parser.parse(new FileReader("catalog.json"));
-            JSONArray categories = (JSONArray) productsData.get("categories");
-            boolean categoryExists = false;
-            boolean productExists = false;
-
-            for (Object categoryObj : categories) {
-                JSONObject category = (JSONObject) categoryObj;
-                if (category.get("categoryID").equals(this.productCategory.getCategoryId())) {
-                    categoryExists = true;
-                    JSONArray products = (JSONArray) category.get("products");
-
-                    for (Object productObj : products) {
-                        JSONObject product = (JSONObject) productObj;
-                        if (product.get("productID").equals(this.productID)) {
-                            productExists = true;
-                            break;
-                        }
-                    }
-
-                    if (!productExists) {
-                        JSONObject newProduct = new JSONObject();
-                        newProduct.put("productID", this.productID);
-                        newProduct.put("name", this.name);
-                        newProduct.put("price", this.price);
-                        newProduct.put("salePrice", this.salePrice);
-                        products.add(newProduct);
-                    }
-                    break;
-                }
-            }
-
-            if (!categoryExists) {
-                JSONObject newCategory = new JSONObject();
-                newCategory.put("categoryID", this.productCategory.getCategoryId());
-                JSONObject newProduct = new JSONObject();
-                newProduct.put("productID", this.productID);
-                newProduct.put("name", this.name);
-                newProduct.put("price", this.price);
-                newProduct.put("salePrice", this.salePrice);
-                JSONArray newProducts = new JSONArray();
-                newProducts.add(newProduct);
-                newCategory.put("products", newProducts);
-                categories.add(newCategory);
-            }
-
-            // Save the updated JSON back to the file
-            FileWriter file = new FileWriter("productsData.json");
-            file.write(productsData.toJSONString());
-            file.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+//    private void addProductToCatalog() {
+//        JSONParser parser = new JSONParser();
+//        try {
+//            JSONObject productsData = (JSONObject) parser.parse(new FileReader("catalog.json"));
+//            JSONArray categories = (JSONArray) productsData.get("categories");
+//            boolean categoryExists = false;
+//            boolean productExists = false;
+//
+//            for (Object categoryObj : categories) {
+//                JSONObject category = (JSONObject) categoryObj;
+//                if (category.get("categoryID").equals(this.productCategory.getCategoryId())) {
+//                    categoryExists = true;
+//                    JSONArray products = (JSONArray) category.get("products");
+//
+//                    for (Object productObj : products) {
+//                        JSONObject product = (JSONObject) productObj;
+//                        if (product.get("productID").equals(this.productID)) {
+//                            productExists = true;
+//                            break;
+//                        }
+//                    }
+//
+//                    if (!productExists) {
+//                        JSONObject newProduct = new JSONObject();
+//                        newProduct.put("productID", this.productID);
+//                        newProduct.put("name", this.name);
+//                        newProduct.put("price", this.price);
+//                        newProduct.put("salePrice", this.salePrice);
+//                        products.add(newProduct);
+//                    }
+//                    break;
+//                }
+//            }
+//
+//            if (!categoryExists) {
+//                JSONObject newCategory = new JSONObject();
+//                newCategory.put("categoryID", this.productCategory.getCategoryId());
+//                JSONObject newProduct = new JSONObject();
+//                newProduct.put("productID", this.productID);
+//                newProduct.put("name", this.name);
+//                newProduct.put("price", this.price);
+//                newProduct.put("salePrice", this.salePrice);
+//                JSONArray newProducts = new JSONArray();
+//                newProducts.add(newProduct);
+//                newCategory.put("products", newProducts);
+//                categories.add(newCategory);
+//            }
+//
+//            // Save the updated JSON back to the file
+//            FileWriter file = new FileWriter("productsData.json");
+//            file.write(productsData.toJSONString());
+//            file.close();
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
     public void updateBranchStockAfterSale(int quantitySold, String branchId){
         // Load the JSON file
         JSONParser stockParser = new JSONParser();
