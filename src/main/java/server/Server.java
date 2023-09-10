@@ -4,9 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Server {
     private static final int PORT_NUMBER = 8080;
+    private static final Set<String> loggedInUsers = Collections.synchronizedSet(new HashSet<>());
+
 
     public static void main(String[] args) {
         Server server = new Server();
@@ -25,7 +30,7 @@ public class Server {
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                new Thread(new ClientHandler(clientSocket)).start();
+                new Thread(new ClientHandler(clientSocket, loggedInUsers)).start();
             }
 
         } catch (IOException e) {
