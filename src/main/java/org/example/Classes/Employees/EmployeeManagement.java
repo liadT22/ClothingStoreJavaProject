@@ -20,7 +20,7 @@ public class EmployeeManagement {
     public EmployeeManagement() {
     }
 
-    public List<Employee> getEmployeesFromFile() {
+    public static List<Employee> getEmployeesFromFile() {
         try {
             String employeesJSON = JSONHelper.readFile("employees.json");
             List<Employee> employees = new ArrayList<Employee>();
@@ -52,6 +52,7 @@ public class EmployeeManagement {
 
     }
 
+
     public List<Employee> getEmployeesByBranch(String branchID) {
         List<Employee> employees = getEmployeesFromFile();
         for (int i = 0; i < employees.size(); i++) {
@@ -63,11 +64,23 @@ public class EmployeeManagement {
 
     }
 
+    public static Employee authLogin(String employeeID, String password){
+        List<Employee> employees = getEmployeesFromFile();
+        if (employees != null) {
+            for (Employee value : employees) {
+                if (Objects.equals(value.getEmployeeID(), employeeID) && Objects.equals(value.getPassword(), password)) {
+                    return value;
+                }
+            }
+        }
+        return null;
+    }
+
     public void addEmployee(Employee employee) {
         List<Employee> employees = getEmployeesFromFile();
         if (employees != null) {
-            for (int i = 0; i < employees.size(); i++) {
-                if (Objects.equals(employees.get(i).getEmployeeID(), employee.getEmployeeID())) {
+            for (Employee value : employees) {
+                if (Objects.equals(value.getEmployeeID(), employee.getEmployeeID())) {
                     throw new RuntimeException("Employee is already exists");
                 }
             }
