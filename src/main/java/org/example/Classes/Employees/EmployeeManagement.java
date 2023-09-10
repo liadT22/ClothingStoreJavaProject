@@ -29,7 +29,6 @@ public class EmployeeManagement {
                 JsonNode jsonArray = objectMapper.readTree(employeesJSON);
                 for (JsonNode element : jsonArray) {
                     JsonNode isAdminNode = element.get("isAdmin");
-                    System.out.println(isAdminNode);
                     Employee object;
                     if (isAdminNode != null && isAdminNode.isBoolean()) {
                         if (isAdminNode.asBoolean()) {
@@ -37,7 +36,6 @@ public class EmployeeManagement {
                         } else {
                             object = objectMapper.treeToValue(element, Employee.class);
                         }
-                        System.out.println(object);
                         employees.add(object);
                     }
 
@@ -115,6 +113,7 @@ public class EmployeeManagement {
             String json = new Gson().toJson(employees);
             try {
                 JSONHelper.writeToFile(json, "employees.json");
+                System.out.println("User updated successfully!");
             } catch (FileNotFoundException e) {
                 System.out.println(e.getMessage());
             }
@@ -128,7 +127,6 @@ public class EmployeeManagement {
         List<Employee> employees = getEmployeesFromFile();
         int i = 0;
         boolean isUserFound = false;
-        System.out.println("employees.length" + employees.size());
         if (employees != null) {
             while (i < employees.size() && !isUserFound) {
                 if (Objects.equals(employees.get(i).getEmployeeID(), employeeID)) {
@@ -137,17 +135,20 @@ public class EmployeeManagement {
                 }
                 i++;
             }
-            System.out.println("employees.length2" + employees.size());
             if (isUserFound) {
                 String json = new Gson().toJson(employees);
                 try {
                     JSONHelper.writeToFile(json, "employees.json");
+                    System.out.println("User deleted successfully!");
                 } catch (FileNotFoundException e) {
                     System.out.println(e.getMessage());
                 }
+            } else {
+                System.out.println("Could not find user to delete");
             }
+        } else {
+            System.out.println("Could not find user to delete");
         }
-        System.out.println("Could not find user to delete");
 
     }
 

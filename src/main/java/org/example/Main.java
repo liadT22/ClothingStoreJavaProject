@@ -37,14 +37,10 @@ public class Main {
             em.addEmployee(m);
             em.addEmployee(e2);
 
-           
-            // System.out.println("m" + m.toString());
-            // em.addEmployee(m);
-
             // em.deleteEmployee("124");
-            //  Employee e3 = new Employee("123", "Tamara Slouzky", "1", "0532747988", "tamara", "1234", EmployeeType.FLOOR);
-            // em.updateEmployee(e3);
-            // em.addEmployee(e2);
+             Employee e3 = new Employee("123", "Tamara Slouzky", "1", "0532747988", "tamara", "1234", EmployeeType.FLOOR);
+            em.updateEmployee(e3);
+            System.out.println(em.getEmployeeDetails("123"));
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
