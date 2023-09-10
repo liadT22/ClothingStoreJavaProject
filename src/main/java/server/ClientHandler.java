@@ -1,15 +1,9 @@
 package server;
 
 import org.example.Classes.Enum.EmployeeType;
-import shared.*;
-import shared.Commands;
-import utils.JSONHelper;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.InputMismatchException;
-import java.util.List;
-import java.util.Scanner;
 
 class ClientHandler implements Runnable {
 
@@ -30,19 +24,19 @@ class ClientHandler implements Runnable {
             try {
                 String command = (String) inputStream.readObject();
                 switch (command) {
-                    case Commands.LOGIN:
+                    case "LOGIN":
                         handleLogin();
                         break;
-                    case Commands.FETCH_EMPLOYEES:
+                    case "FETCH_EMPLOYEES":
                         handleFetchEmployees();
                         break;
-                    case Commands.UPDATE_EMPLOYEES:
+                    case "UPDATE_EMPLOYEES":
                         handleUpdateEmployees();
                         break;
-                    case Commands.UPDATE_INVENTORY:
+                    case "UPDATE_INVENTORY":
                         handleUpdateInventory();
                         break;
-                    case Commands.FETCH_INVENTORY:
+                    case "FETCH_INVENTORY":
                         handleFetchInventory();
                         break;
                     // ... other command handlers
