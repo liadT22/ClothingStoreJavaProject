@@ -1,6 +1,6 @@
 package org.example.Classes.Enum;
 
-public enum EproductCategory {
+public enum ProductCategory {
     SHIRT,
     PANTS,
     HATS,

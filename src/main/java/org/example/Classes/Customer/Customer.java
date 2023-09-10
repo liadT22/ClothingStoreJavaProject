@@ -1,8 +1,12 @@
 package org.example.Classes.Customer;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.example.Classes.BranchManagement;
 import org.example.Classes.Enum.CustomerType;
 import org.example.Classes.Product;
+
+import java.io.FileNotFoundException;
 
 
 public class Customer {
@@ -70,8 +74,14 @@ public class Customer {
         this.phone = phone;
     }
 
-    public void buyProduct(Product product, int amount){
-        double finalPrice = product.getPrice() * amount;
+    public void buyProduct(Product product, int amount, String branchID){
+        double finalPrice = product.getSellPrice() * amount;
+        product.setQuantity(amount);
+        try{
+            BranchManagement.getInstance().buyProductsForBranch(branchID, product);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
         finalPrice -= finalPrice * this.getDiscountPercent();
         System.out.println("You need to pay: " + finalPrice + "$");
     }

@@ -90,7 +90,7 @@ public class CustomerManagement {
         throw new RuntimeException("customer is not in the database");
     }
 
-    public void onBuyProduct(Product product, int amount, String customerID, String name, String postalCode, String phone) throws FileNotFoundException, JsonProcessingException {
+    public void onBuyProduct(Product product,String branchID , int amount, String customerID, String name, String postalCode, String phone) throws FileNotFoundException, JsonProcessingException {
         this.readFile();
         Customer upgradedCustomer = null;
         boolean isCustomerExist = false;
@@ -103,14 +103,14 @@ public class CustomerManagement {
                     upgradedCustomer = new VIPCustomer(customer.getCustomerID(), customer.getName(), customer.getPostalCode(), customer.getPhone());
                 }
                 assert upgradedCustomer != null;
-                upgradedCustomer.buyProduct(product, amount);
+                upgradedCustomer.buyProduct(product, amount, branchID);
                 this.updateCustomer(upgradedCustomer);
                 break;
             }
         }
         if(!isCustomerExist){
             Customer newCustomer = new NewCustomer(customerID, name, postalCode, phone);
-            newCustomer.buyProduct(product, amount);
+            newCustomer.buyProduct(product, amount, branchID);
             addCustomer(newCustomer);
         }
     }
