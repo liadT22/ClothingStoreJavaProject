@@ -1,8 +1,14 @@
 package server;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.example.Classes.BranchManagement;
+import org.example.Classes.Customer.Customer;
+import org.example.Classes.Customer.CustomerManagement;
 import org.example.Classes.Employees.Employee;
 import org.example.Classes.Employees.EmployeeManagement;
 import org.example.Classes.Enum.EmployeeType;
+import org.example.Classes.Product;
+import org.example.Classes.SaleReport;
 import utils.Authentication;
 
 import java.io.*;
@@ -10,6 +16,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 class ClientHandler implements Runnable {
@@ -88,6 +95,8 @@ class ClientHandler implements Runnable {
             case "UPDATE_INVENTORY":
                 handleUpdateInventory();
                 break;
+            case "SHOW_PRODUCT":
+                handleShowProduct();
             case "FETCH_INVENTORY":
                 handleFetchInventory();
                 break;
@@ -131,9 +140,23 @@ class ClientHandler implements Runnable {
     private void handleGetReportByCategory() {
     }
 
+    private void handleShowProduct(){
+        try{
+            String productID = (String) inputStream.readObject();
+            List<Product> allProduct = BranchManagement.getInstance().showAllProducts();
+            for(Product p : allProduct){
+                if(Objects.equals(p.getProductID(), productID)){
+                    outputStream.writeObject(p);
+                    return;
+                }
+            }
+            outputStream.writeObject(null);
+        }catch (Exception e){
+
+        }
+    }
     private void handleGetReportByProduct() {
     }
-
     private void handleGetReportByBranch() {
     }
 
@@ -146,6 +169,15 @@ class ClientHandler implements Runnable {
     }
 
     private void processSell() {
+        try{
+            String productID = (String) inputStream.readObject();
+            Customer customer = (Customer) inputStream.readObject();
+            if(CustomerManagement.getInstance().onBuyProduct(productID, this.loggedInUser.getBranchID(), customer)){
+                SaleReport saleReport = new SaleReport(productID, customer.getCustomerID(), this.loggedInUser.getEmployeeID(),this.loggedInUser.getBranchID());
+            }
+        }catch (Exception e){
+            System.out.println("processSell: " + e.getMessage());
+        }
     }
 
     private void handleAddEmployee() {
@@ -167,6 +199,12 @@ class ClientHandler implements Runnable {
     }
 
     private void handleFetchInventory() {
+        try{
+            List<Product> productList = BranchManagement.getInstance().showProductListFromSpecificBranch(loggedInUser.getBranchID());
+            outputStream.writeObject(productList);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void handleUpdateInventory() {

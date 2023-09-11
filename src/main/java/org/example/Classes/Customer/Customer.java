@@ -1,15 +1,14 @@
 package org.example.Classes.Customer;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.example.Classes.BranchManagement;
 import org.example.Classes.Enum.CustomerType;
 import org.example.Classes.Product;
 
-import java.io.FileNotFoundException;
+import java.io.Serializable;
 
 
-public class Customer {
+public class Customer implements Serializable {
     private String customerID;
     private String name;
     private String postalCode;
@@ -74,11 +73,10 @@ public class Customer {
         this.phone = phone;
     }
 
-    public void buyProduct(Product product, int amount, String branchID){
-        double finalPrice = product.getSellPrice() * amount;
-        product.setQuantity(amount);
+    public void buyProduct(Product product, String branchID){
+        double finalPrice = product.getSellPrice();
         try{
-            BranchManagement.getInstance().buyProductsForBranch(branchID, product);
+            BranchManagement.getInstance().buyProductsFromBranch(branchID, product);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }

@@ -16,7 +16,6 @@ public class BranchManagement {
     private static BranchManagement branchInstance = null;
 
     public static BranchManagement getInstance() throws FileNotFoundException, JsonProcessingException {
-//lazy initialization
         if (branchInstance == null)
             branchInstance = new BranchManagement();
         return branchInstance;
@@ -24,7 +23,7 @@ public class BranchManagement {
 
     public BranchManagement() throws FileNotFoundException, JsonProcessingException {
         this.branches = new ArrayList<Branch>();
-        this.readFile();
+        this.readBranchFile();
     }
 
     private void writeToBranchesFile() throws FileNotFoundException {
@@ -50,7 +49,7 @@ public class BranchManagement {
     }
 
 
-    private void readFile() throws JsonProcessingException, FileNotFoundException {
+    private void readBranchFile() throws JsonProcessingException, FileNotFoundException {
         String json = JSONHelper.readFile("branches.json");
         this.branches.clear();
         ObjectMapper objectMapper = new ObjectMapper();
@@ -65,15 +64,48 @@ public class BranchManagement {
         }
     }
 
+    private List<Product> readAndGetProductFile() throws FileNotFoundException, JsonProcessingException {
+        String json = JSONHelper.readFile("products.json");
+        List<Product> allProducts = new ArrayList<>();
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonArray = objectMapper.readTree(json);
+        for (JsonNode element : jsonArray) {
+            try{
+                Product object = objectMapper.treeToValue(element, Product.class);
+                allProducts.add(object);
+            }catch (Exception e){
+                System.out.println(e.getMessage());
+            }
+        }
+        return allProducts;
+    }
+
 
     public void addBranch(Branch branch) throws FileNotFoundException, JsonProcessingException {
-        this.readFile();
+        this.readBranchFile();
         branches.add(branch);
         this.writeToBranchesFile();
     }
 
+    public List<Product> showAllProducts() throws FileNotFoundException, JsonProcessingException {
+        return readAndGetProductFile();
+    }
+
+    public Product getProductIfExist(String productID, String branchID) throws FileNotFoundException, JsonProcessingException {
+        for(Branch b : this.branches){
+            if(Objects.equals(b.getBranchID(), branchID)){
+                for (Product p : b.getInventory()){
+                    if(Objects.equals(p.getProductID(), productID)){
+                        return p;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     public List<Product> showProductListFromSpecificBranch(String branchID) throws FileNotFoundException, JsonProcessingException {
-        this.readFile();
+        this.readBranchFile();
         for(Branch branch : this.branches){
             if(Objects.equals(branch.getBranchID(), branchID)){
                 return branch.getInventory();
@@ -83,20 +115,24 @@ public class BranchManagement {
     }
 
     public void buyProductsForBranch(String branchID, Product product) throws FileNotFoundException, JsonProcessingException {
-        this.readFile();
+        this.readBranchFile();
         for(Branch branch : this.branches){
             if(Objects.equals(branch.getBranchID(), branchID)){
-                branch.addProduct(product);
-                this.writeToBranchesFile();
-                this.writeToProductFile(product);
+                for(Product p : branch.getInventory()){
+                    if(Objects.equals(p.getProductID(), product.getProductID())){
+                        p.setQuantity(p.getQuantity() + product.getQuantity());
+                    }else{
+                        branch.addProduct(product);
+                    }
+                }
                 return;
             }
         }
         throw new RuntimeException("branchID: " + branchID + " does not exist");
     }
 
-    public void sellProductsFromBranch(String branchID, Product product) throws FileNotFoundException, JsonProcessingException {
-        this.readFile();
+    public void buyProductsFromBranch(String branchID, Product product) throws FileNotFoundException, JsonProcessingException {
+        this.readBranchFile();
         for(Branch branch : this.branches){
             if(Objects.equals(branch.getBranchID(), branchID)){
                 branch.removeProduct(product);

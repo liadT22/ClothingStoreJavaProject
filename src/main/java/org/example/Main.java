@@ -3,6 +3,7 @@ package org.example;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.example.Classes.Branch;
 import org.example.Classes.BranchManagement;
+import org.example.Classes.Customer.Customer;
 import org.example.Classes.Customer.CustomerManagement;
 import org.example.Classes.Employees.Manager;
 import org.example.Classes.Enum.EmployeeType;
@@ -24,17 +25,16 @@ public class Main {
         } catch (Exception e) {
             System.out.println("Customer: " + e.getMessage());
         }
-        try {
-            checkEmployee();
-        } catch (Exception e) {
-            System.out.println("Employee: " + e.getMessage());
-        }
-        try {
-            checkBranches();
-        } catch (Exception e) {
-            System.out.println("Branches: " + e.getMessage());
-        }
-
+//        try {
+//            checkEmployee();
+//        } catch (Exception e) {
+//            System.out.println("Employee: " + e.getMessage());
+//        }
+//        try {
+//            checkBranches();
+//        } catch (Exception e) {
+//            System.out.println("Branches: " + e.getMessage());
+//        }
     }
 
     private static void checkBranches() throws FileNotFoundException, JsonProcessingException {
@@ -44,8 +44,8 @@ public class Main {
         br.addBranch(br1);
         br.buyProductsForBranch("1", p);
         p.setQuantity(3);
-        br.sellProductsFromBranch("1", p);
-        br.sellProductsFromBranch("1", p);
+        br.buyProductsFromBranch("1", p);
+        br.buyProductsFromBranch("1", p);
         br.addBranch(br1);
     }
     private static void checkEmployee(){
@@ -63,13 +63,7 @@ public class Main {
         System.out.println(em.getEmployeeDetails("123"));
     }
     private static void checkCustomer() throws IOException {
-        Product p = new Product("1", "1", ProductCategory.PANTS, 1.0, 5);
-        CustomerManagement customManage = new CustomerManagement();
-        customManage.onBuyProduct(p, "1", 2, "1","Inbar","2","1");
-        customManage.onBuyProduct(p,"1", 2, "1","Inbar","1","1");
-        customManage.onBuyProduct(p,"1", 2, "3","Inbar2","1","1");
-        customManage.deleteCustomer("2");
-        System.out.println(customManage.getCustomerDetails("1").getName());
-        System.out.println(customManage.getCustomerDetails("3").getName());
+        Customer customer = new Customer("5", "5", "5", "5");
+        CustomerManagement.getInstance().onBuyProduct("1", "1", customer);
     }
 }
