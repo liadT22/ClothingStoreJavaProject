@@ -19,16 +19,16 @@ import java.io.IOException;
 public class Main {
     public static void main(String[] args) throws IOException {
         JSONHelper.checkAndCreateFiles();
-//        try {
-//            checkCustomer();
-//        } catch (Exception e) {
-//            System.out.println("Customer: " + e.getMessage());
-//        }
-//        try {
-//            checkEmployee();
-//        } catch (Exception e) {
-//            System.out.println("Employee: " + e.getMessage());
-//        }
+        try {
+            checkCustomer();
+        } catch (Exception e) {
+            System.out.println("Customer: " + e.getMessage());
+        }
+        try {
+            checkEmployee();
+        } catch (Exception e) {
+            System.out.println("Employee: " + e.getMessage());
+        }
         try {
             checkBranches();
         } catch (Exception e) {
