@@ -23,7 +23,7 @@ class ClientHandler implements Runnable {
 
 
 
-    public ClientHandler(Socket clientSocket, Set<String> loggedInUsers) {
+    public ClientHandler(Socket clientSocket, Set<String> loggedInUsers) throws IOException {
         this.clientSocket = clientSocket;
         this.loggedInUsers = loggedInUsers;
         try {
@@ -34,7 +34,6 @@ class ClientHandler implements Runnable {
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
-
     }
 
     @Override
@@ -52,7 +51,8 @@ class ClientHandler implements Runnable {
 
             } catch (Exception e) {
                 System.out.println("Error processing command: " + e.getMessage());
-            } finally {
+            } 
+            finally {
                 try {
                     clientSocket.close();
                 } catch (IOException e) {
@@ -141,19 +141,30 @@ class ClientHandler implements Runnable {
     }
 
     private void handleStartChat() {
+        try {
+            outputStream.writeObject(loggedInUsers);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void processSell() {
     }
 
-    private void handleAddEmployee() throws IOException, ClassNotFoundException {
-        try{
+    private void handleAddEmployee() {
+        try {
             Employee newEmployee = (Employee) inputStream.readObject();
             EmployeeManagement em = new EmployeeManagement();
             em.addEmployee(newEmployee);
             outputStream.writeObject(true);
-        } catch (IOException e){
-            outputStream.writeObject(false);
+        } catch (IOException e) {
+            try {
+                outputStream.writeObject(false);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
 
     }
@@ -171,24 +182,30 @@ class ClientHandler implements Runnable {
 
     }
 
-    private void handleLogin() throws IOException, ClassNotFoundException {
-        String ID = (String) inputStream.readObject();
-        String password = (String) inputStream.readObject();
+    private void handleLogin() {
+        String ID;
+        try {
+            ID = (String) inputStream.readObject();
 
-        // Check if user is already logged in
-        synchronized (loggedInUsers) {
-            if (loggedInUsers.contains(ID)) {
-                outputStream.writeObject("User already logged in from another device.");
-                return;
-            }
+            String password = (String) inputStream.readObject();
 
-            Employee employee = Authentication.authLogin(ID, password);
-            if (employee != null) {
-                loggedInUsers.add(ID);
-                loggedInUser = employee;
+            // Check if user is already logged in
+            synchronized (loggedInUsers) {
+                if (loggedInUsers.contains(ID)) {
+                    outputStream.writeObject("User already logged in from another device.");
+                    return;
+                }
+
+                Employee employee = Authentication.authLogin(ID, password);
+                if (employee != null) {
+                    loggedInUsers.add(ID);
+                    loggedInUser = employee;
+                }
             }
+            outputStream.writeObject(this.loggedInUser);
+        } catch (ClassNotFoundException | IOException e) {
+            e.printStackTrace();
         }
-        outputStream.writeObject(this.loggedInUser);
     }
 
     private void handleLogout() throws IOException {
@@ -200,8 +217,5 @@ class ClientHandler implements Runnable {
             outputStream.writeObject("No user is currently logged in.");
         }
     }
-
-
-
 
 }
