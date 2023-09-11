@@ -22,10 +22,12 @@ public class Client {
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
     private Employee loggedInEmployee;
+    private boolean isChatMode;
 
     public Client(String serverAddress, int serverPort) {
         this.serverAddress = serverAddress;
         this.serverPort = serverPort;
+        this.isChatMode = false;
     }
 
     public void sendDataToServer(Object data) {
@@ -112,23 +114,27 @@ public class Client {
 
     public void displayMenu() throws IOException {
         while (loggedInEmployee != null) {
-            System.out.println("\n--- MENU ---");
-            switch (loggedInEmployee.getPosition()) {
-                case FLOOR:
-                    displayFloorMenu();
-                    break;
-                case CASHIER:
-                    displayCashierMenu();
-                    break;
-                case SHIFT_SUPERVISOR:
-                    displayShiftSupervisorMenu();
-                    break;
-            }
+            if (isChatMode == true) {
 
-            System.out.print("\nEnter your choice: ");
-            Scanner scanner = new Scanner(System.in);
-            int choice = scanner.nextInt();
-            handleMenuChoice(choice);
+            } else {
+                System.out.println("\n--- MENU ---");
+                switch (loggedInEmployee.getPosition()) {
+                    case FLOOR:
+                        displayFloorMenu();
+                        break;
+                    case CASHIER:
+                        displayCashierMenu();
+                        break;
+                    case SHIFT_SUPERVISOR:
+                        displayShiftSupervisorMenu();
+                        break;
+                }
+
+                System.out.print("\nEnter your choice: ");
+                Scanner scanner = new Scanner(System.in);
+                int choice = scanner.nextInt();
+                handleMenuChoice(choice);
+            }
         }
     }
 
@@ -215,6 +221,9 @@ public class Client {
             case 4:
                 // Logout
                 logout();
+                break;
+            case 5:
+                startChat();
                 break;
             default:
                 System.out.println("Invalid choice. Please try again.");
@@ -500,20 +509,22 @@ public class Client {
         }
     }
 
-    private void logout(){
+    private void logout() {
         try {
-        System.out.println("Logging out...");
-        // Close connection, reset loggedInEmployee, etc.
-        outputStream.writeObject("LOGOUT");
-        this.loggedInEmployee = null;
-        Object response = inputStream.readObject();
-        System.out.println(response);
-        this.closeSession();
+            System.out.println("Logging out...");
+            // Close connection, reset loggedInEmployee, etc.
+            outputStream.writeObject("LOGOUT");
+            this.loggedInEmployee = null;
+            Object response = inputStream.readObject();
+            System.out.println(response);
+            this.closeSession();
         } catch (IOException | ClassNotFoundException e) {
             System.out.println(e.getMessage());
         }
     }
+
     private void startChat() {
+        this.isChatMode = true;
         sendDataToServer("START_CHAT");
         try {
             Object loggedInUsers = inputStream.readObject();
@@ -534,6 +545,22 @@ public class Client {
                 sendDataToServer(userToChat);
                 Object employee = (Object) inputStream.readObject();
                 System.out.println("You chose to talk to: " + employee);
+                String message = "";
+                while (!message.equals("bye")) {
+                    System.out.println("Write your message " + employee);
+                    message = scanner.nextLine();
+                    sendDataToServer("SEND_MESSAGE");
+                    sendDataToServer(userToChat);
+                    sendDataToServer(message);
+                    Object recievedId = (Object) inputStream.readObject();
+
+                    if (recievedId.equals(loggedInEmployee.getEmployeeID())) {
+                        Object recievedMessage = (Object) inputStream.readObject();
+                        System.out.println(recievedMessage);
+                    }
+                }
+                this.isChatMode = false;
+
             }
 
         } catch (ClassNotFoundException e) {
@@ -543,7 +570,6 @@ public class Client {
         }
 
     }
-
 
     public static void main(String[] args) {
         Client client = new Client("localhost", 8080);
