@@ -189,10 +189,21 @@ public class Client {
                 // Logout
                 logout();
                 break;
+            case 4:
+                outputStream.writeObject("START_CHAT");
+                try {
+                    Object a = inputStream.readObject();
+                    System.out.println(a);
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+                break;
             default:
                 System.out.println("Invalid choice. Please try again.");
         }
     }
+
     private void handleCashierChoice(int choice) throws IOException {
         switch (choice) {
             case 1:
@@ -236,6 +247,17 @@ public class Client {
                 manageEmployees();
                 break;
             case 7:
+                outputStream.writeObject("START_CHAT");
+                try {
+                    Object a = inputStream.readObject();
+                    System.out.println(a);
+                } catch (ClassNotFoundException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
+                break;
+            case 8:
                 // Logout
                 logout();
                 break;
@@ -369,7 +391,6 @@ public class Client {
             System.out.println("Something didn't work, try again");
         }
     }
-
 
     private void logout() throws IOException {
         System.out.println("Logging out...");
