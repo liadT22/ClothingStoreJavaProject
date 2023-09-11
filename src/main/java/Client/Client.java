@@ -21,14 +21,14 @@ public class Client {
         this.serverPort = serverPort;
     }
 
-    public Object handleServerResponse() {
-        try {
-            return inputStream.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+//    public Object handleServerResponse() {
+//        try {
+//            return inputStream.readObject();
+//        } catch (IOException | ClassNotFoundException e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
 
     public void sendDataToServer(Object data) {
         try {
@@ -96,7 +96,7 @@ public class Client {
         sendDataToServer(password);
 
         // Receive the response from the server
-        loggedInEmployee = (Employee) handleServerResponse();
+        loggedInEmployee = (Employee) inputStream.readObject();
 
         if (loggedInEmployee != null) {
             System.out.println("Login successful!");
@@ -362,7 +362,12 @@ public class Client {
         sendDataToServer(newEmployee);
 
         // Receive the response from the server
-        boolean response = (boolean) handleServerResponse();
+        boolean response = false;
+        try {
+            response = (boolean) inputStream.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println(e.getMessage());
+        }
         if (response) {
             System.out.println("Employee added successfully");
         } else {
