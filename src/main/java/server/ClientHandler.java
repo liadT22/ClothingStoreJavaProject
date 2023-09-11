@@ -8,6 +8,7 @@ import org.example.Classes.Employees.Employee;
 import org.example.Classes.Employees.EmployeeManagement;
 import org.example.Classes.Enum.EmployeeType;
 import org.example.Classes.Product;
+import org.example.Classes.ReportManager;
 import org.example.Classes.SaleReport;
 import utils.Authentication;
 
@@ -161,8 +162,21 @@ class ClientHandler implements Runnable {
         }
     }
     private void handleGetReportByProduct() {
+        try {
+            String productId = (String) inputStream.readObject();
+            List<SaleReport> report = ReportManager.getAnalyticsByProduct(productId);
+            outputStream.writeObject(report);
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
     private void handleGetReportByBranch() {
+        List<SaleReport> report = ReportManager.getAnalyticsByBranch(loggedInUser.getBranchID());
+        try {
+            outputStream.writeObject(report);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void handleStartChat() {
