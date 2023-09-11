@@ -83,6 +83,11 @@ public class BranchManagement {
 
     public void addBranch(Branch branch) throws FileNotFoundException, JsonProcessingException {
         this.readBranchFile();
+        for(Branch b : this.branches){
+            if(Objects.equals(b.getBranchID(), branch.getBranchID())){
+                throw new RuntimeException("Branch already exist");
+            }
+        }
         branches.add(branch);
         this.writeToBranchesFile();
     }
@@ -116,15 +121,19 @@ public class BranchManagement {
 
     public void buyProductsForBranch(String branchID, Product product) throws FileNotFoundException, JsonProcessingException {
         this.readBranchFile();
+        boolean isProductExist = false;
         for(Branch branch : this.branches){
             if(Objects.equals(branch.getBranchID(), branchID)){
                 for(Product p : branch.getInventory()){
-                    if(Objects.equals(p.getProductID(), product.getProductID())){
+                    if(Objects.equals(p.getProductID(), product.getProductID())) {
+                        isProductExist = true;
                         p.setQuantity(p.getQuantity() + product.getQuantity());
-                    }else{
-                        branch.addProduct(product);
                     }
                 }
+                if(!isProductExist){
+                    branch.addProduct(product);
+                }
+                writeToBranchesFile();
                 return;
             }
         }

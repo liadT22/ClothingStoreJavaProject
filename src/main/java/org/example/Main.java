@@ -21,20 +21,20 @@ public class Main {
     public static void main(String[] args) throws IOException {
         JSONHelper.checkAndCreateFiles();
         try {
+            checkBranches();
+        } catch (Exception e) {
+            System.out.println("Branches: " + e.getMessage());
+        }
+        try {
             checkCustomer();
         } catch (Exception e) {
             System.out.println("Customer: " + e.getMessage());
         }
-//        try {
-//            checkEmployee();
-//        } catch (Exception e) {
-//            System.out.println("Employee: " + e.getMessage());
-//        }
-//        try {
-//            checkBranches();
-//        } catch (Exception e) {
-//            System.out.println("Branches: " + e.getMessage());
-//        }
+        try {
+            checkEmployee();
+        } catch (Exception e) {
+            System.out.println("Employee: " + e.getMessage());
+        }
     }
 
     private static void checkBranches() throws FileNotFoundException, JsonProcessingException {
@@ -42,6 +42,7 @@ public class Main {
         Product p = new Product("1", "pants", ProductCategory.PANTS, 1.0, 5);
         Branch br1 = new Branch("1", "1");
         br.addBranch(br1);
+        br.buyProductsForBranch("1", p);
         br.buyProductsForBranch("1", p);
         p.setQuantity(3);
         br.buyProductsFromBranch("1", p);

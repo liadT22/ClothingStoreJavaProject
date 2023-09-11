@@ -25,6 +25,7 @@ public class Branch implements Serializable {
     public void addEmployee(Employee employee){
         this.employees.add(employee);
     }
+
     public void addProduct(Product product){
         boolean isProductAdded = false;
         for(Product p : this.inventory){
