@@ -21,9 +21,6 @@ class ClientHandler implements Runnable {
     private Employee loggedInUser;
     private String clientAddress;
 
-
-
-
     public ClientHandler(Socket clientSocket, Set<String> loggedInUsers) throws IOException {
         this.clientSocket = clientSocket;
         this.loggedInUsers = loggedInUsers;
@@ -106,7 +103,8 @@ class ClientHandler implements Runnable {
             case "GET_EMPLOYEE_DETAILS":
                 handleFetchEmployeeById();
                 break;
-            case "CONNECT_TO_CHAT":
+            case "SEND_MESSAGE":
+                handleSendMessage();
                 break;
             case "GET_REPORT_BY_BRANCH":
                 handleGetReportByBranch();
@@ -146,6 +144,19 @@ class ClientHandler implements Runnable {
         try {
             outputStream.writeObject(loggedInUsers);
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void handleSendMessage() {
+        try {
+            String targetUserId = (String) inputStream.readObject();
+            String message = (String) inputStream.readObject();
+            System.out.println("targetUserId: " + targetUserId);
+            System.out.println("message: " + message);
+            outputStream.writeObject(1);
+            outputStream.writeObject(message);
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
@@ -198,11 +209,11 @@ class ClientHandler implements Runnable {
     }
 
     private void handleFetchEmployees() {
-        try{
+        try {
             EmployeeManagement em = new EmployeeManagement();
             List<Employee> employeesInBranch = em.getEmployeesByBranch(loggedInUser.getBranchID());
             outputStream.writeObject(employeesInBranch);
-        }catch(IOException e){
+        } catch (IOException e) {
             System.out.println(e.getMessage());
         }
     }
