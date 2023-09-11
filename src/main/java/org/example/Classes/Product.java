@@ -7,12 +7,13 @@ import org.json.simple.parser.JSONParser;
 
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-public class Product {
+public class Product implements Serializable {
 
     private String productID;
     private String name;
@@ -80,6 +81,15 @@ public class Product {
 
     protected void setBuyPrice(double buyPrice) {
         this.buyPrice = buyPrice;
+    }
+
+    @Override
+    public String toString() {
+        return  "productID: "+this.productID+"\n"+
+                "name: "+this.name+"\n"+
+                "productCategory: "+this.productCategory+"\n"+
+                "price: "+this.sellPrice+"\n"+
+                "quantity: "+this.quantity+"\n";
     }
 
     public void addPurchaseToSalesAnalytics(int quantitySold, String branchId){

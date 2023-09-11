@@ -1,12 +1,13 @@
 package org.example.Classes;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import org.example.Classes.Employees.Employee;
 
-public class Branch {
+public class Branch implements Serializable {
     private String branchID;
     private String location;
     private List<Employee> employees;
@@ -41,12 +42,10 @@ public class Branch {
     public void removeProduct(Product product){
         for(Product p : this.inventory){
             if(Objects.equals(p.getProductID(), product.getProductID())){
-                if(p.getQuantity() - product.getQuantity() == 0){
+                if(p.getQuantity() == 1){
                     this.inventory.remove(p);
-                }else if(p.getQuantity() - product.getQuantity() < 0){
-                    throw new RuntimeException("There is only " + p.getQuantity() +" " + p.getName() + " in the store.");
                 }else{
-                    p.setQuantity(p.getQuantity() - product.getQuantity());
+                    p.setQuantity(p.getQuantity() - 1);
                 }
                 break;
             }

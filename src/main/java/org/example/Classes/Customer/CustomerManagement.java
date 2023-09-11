@@ -3,9 +3,7 @@ package org.example.Classes.Customer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.Classes.Customer.Customer;
-import org.example.Classes.Employees.Employee;
-import org.example.Classes.Employees.Manager;
+import org.example.Classes.BranchManagement;
 import org.example.Classes.Enum.CustomerType;
 import org.example.Classes.Product;
 import utils.JSONHelper;
@@ -18,6 +16,15 @@ import java.util.Objects;
 
 public class CustomerManagement {
     private List<Customer> customers;
+
+    private static CustomerManagement customerInstance = null;
+
+    public static CustomerManagement getInstance() throws IOException {
+//lazy initialization
+        if (customerInstance == null)
+            customerInstance = new CustomerManagement();
+        return customerInstance;
+    }
 
     private void writeToFile() throws FileNotFoundException {
         JSONHelper.writeToFile(JSONHelper.convertListToJson(this.customers), "customers.json");
@@ -87,31 +94,40 @@ public class CustomerManagement {
                 return customer;
             }
         }
-        throw new RuntimeException("customer is not in the database");
+        return null;
     }
 
-    public void onBuyProduct(Product product,String branchID , int amount, String customerID, String name, String postalCode, String phone) throws FileNotFoundException, JsonProcessingException {
+    public boolean onBuyProduct(String productID, String branchID, Customer buyingCustomer) throws FileNotFoundException, JsonProcessingException {
         this.readFile();
-        Customer upgradedCustomer = null;
-        boolean isCustomerExist = false;
-        for (Customer customer : this.customers) {
-            if (Objects.equals(customer.getCustomerID(), customerID)) {
-                isCustomerExist = true;
-                if (customer.getCustomerType() == CustomerType.NEW) {
-                    upgradedCustomer = new ReturningCustomer(customer.getCustomerID(), customer.getName(), customer.getPostalCode(), customer.getPhone());
-                } else if (customer.getCustomerType() == CustomerType.RETURNING) {
-                    upgradedCustomer = new VIPCustomer(customer.getCustomerID(), customer.getName(), customer.getPostalCode(), customer.getPhone());
+        Product product = BranchManagement.getInstance().getProductIfExist(productID, branchID);
+        if(product != null){
+            Customer upgradedCustomer = null;
+            boolean isCustomerExist = false;
+            for (Customer customer : this.customers) {
+                if (Objects.equals(customer.getCustomerID(), buyingCustomer.getCustomerID())) {
+                    isCustomerExist = true;
+                    if (customer.getCustomerType() == CustomerType.NEW) {
+                        upgradedCustomer = new ReturningCustomer(customer.getCustomerID(), customer.getName(), customer.getPostalCode(), customer.getPhone());
+                    } else if (customer.getCustomerType() == CustomerType.RETURNING) {
+                        upgradedCustomer = new VIPCustomer(customer.getCustomerID(), customer.getName(), customer.getPostalCode(), customer.getPhone());
+                    }else{
+                        upgradedCustomer = customer;
+                    }
+                    upgradedCustomer.buyProduct(product, branchID);
+                    this.updateCustomer(upgradedCustomer);
+                    break;
                 }
-                assert upgradedCustomer != null;
-                upgradedCustomer.buyProduct(product, amount, branchID);
-                this.updateCustomer(upgradedCustomer);
-                break;
             }
+            if(!isCustomerExist){
+                Customer newCustomer = new NewCustomer(buyingCustomer.getCustomerID(), buyingCustomer.getName(), buyingCustomer.getPostalCode(), buyingCustomer.getPhone());
+                newCustomer.buyProduct(product, branchID);
+                addCustomer(newCustomer);
+            }
+            return true;
+        }else{
+            System.out.println("Product does not exist in this branch");
+            return false;
         }
-        if(!isCustomerExist){
-            Customer newCustomer = new NewCustomer(customerID, name, postalCode, phone);
-            newCustomer.buyProduct(product, amount, branchID);
-            addCustomer(newCustomer);
-        }
+
     }
 }

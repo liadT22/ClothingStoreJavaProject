@@ -4,11 +4,15 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.Set;
 
+import org.example.Classes.Customer.Customer;
+import org.example.Classes.Customer.CustomerManagement;
 import org.example.Classes.Employees.Employee;
 import org.example.Classes.Enum.EmployeeType;
+import org.example.Classes.Product;
 
 public class Client {
 
@@ -140,7 +144,7 @@ public class Client {
         System.out.println("1. View Product");
         System.out.println("2. Manage Customers");
         System.out.println("3. Fetch Inventory");
-        System.out.println("4. Process Sale");
+        System.out.println("4. Process Sell");
         System.out.println("5. Start Chat");
         System.out.println("6. Logout");
     }
@@ -149,7 +153,7 @@ public class Client {
         System.out.println("1. View Product");
         System.out.println("2. Manage Customers");
         System.out.println("3. Fetch Inventory");
-        System.out.println("4. Process Sale");
+        System.out.println("4. Process Sell");
         System.out.println("5. View Sales Report");
         System.out.println("6. Manage Employees");
         System.out.println("7. Start Chat");
@@ -174,13 +178,13 @@ public class Client {
         try {
             switch (choice) {
                 case 1:
-                    // View Products
+                    onShowProductIfExist();
                     break;
                 case 2:
                     // Manage Customers
                     break;
                 case 3:
-                    // Fetch Inventory
+                    onFetchAllProductsInBranch();
                     break;
                 case 4:
                     startChat();
@@ -200,13 +204,13 @@ public class Client {
     private void handleCashierChoice(int choice) {
         switch (choice) {
             case 1:
-                // View Products
+                onShowProductIfExist();
                 break;
             case 2:
-                // Check Inventory
+                onFetchAllProductsInBranch();
                 break;
             case 3:
-                // Process Sale
+                onSellProduct();
                 break;
             case 4:
                 // Logout
@@ -220,37 +224,36 @@ public class Client {
     private void handleShiftSupervisorChoice(int choice) {
         try {
             switch (choice) {
-                case 1:
-                    // View Products
-                    break;
-                case 2:
-                    // Manage Customers
-                    break;
-                case 3:
-                    // Check Inventory
-                    break;
-                case 4:
-                    // Process Sale
-                    break;
-                case 5:
-                    // View Sales Report
-                    manageSalesReports();
-                    break;
-                case 6:
-                    // Manage Employees
-                    manageEmployees();
-                    break;
-                case 7:
-                    // outputStream.writeObject("START_CHAT");
-                    // try {
-                    // Object a = inputStream.readObject();
-                    // System.out.println(a);
-                    // } catch (ClassNotFoundException e) {
-                    // // TODO Auto-generated catch block
-                    // e.printStackTrace();
-                    // }
+            case 1:
+                onShowProductIfExist();
+                break;
+            case 2:
+                // Manage Customers
+                break;
+            case 3:
+                onFetchAllProductsInBranch();
+                break;
+            case 4:
+                onSellProduct();
+                break;
+            case 5:
+                // View Sales Report
+                manageSalesReports();
+                break;
+            case 6:
+                // Manage Employees
+                manageEmployees();
+                break;
+            case 7:
+                 //outputStream.writeObject("START_CHAT");
+                  // try {
+                  // Object a = inputStream.readObject();
+                  // System.out.println(a);
+                  // } catch (ClassNotFoundException e) {
+                  // // TODO Auto-generated catch block
+                  // e.printStackTrace();
+                  // }
                     startChat();
-
                     break;
                 case 8:
                     // Logout
@@ -325,6 +328,92 @@ public class Client {
                 break;
             default:
                 System.out.println("Invalid choice.");
+        }
+    }
+
+    private String getProductIDFromUser() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter product id: ");
+        return scanner.nextLine();
+
+    }
+
+    private void onSellProduct(){
+        System.out.println("\n--- Sell Product ---");
+        try{
+            outputStream.writeObject("PROCESS_SELL");
+            String productID = getProductIDFromUser();
+            Customer customer = getCustomerDetails();
+            outputStream.writeObject(productID);
+            outputStream.writeObject(customer);
+        }catch (Exception e){
+            System.out.println("onSellProduct: " + e.getMessage());
+        }
+    }
+
+    private Customer getCustomerDetails(){
+        Scanner scanner = new Scanner(System.in);
+        Customer customer = null;
+        System.out.println("Enter customer ID: ");
+        try {
+            customer = CustomerManagement.getInstance().getCustomerDetails(scanner.nextLine());
+        }catch (Exception ignored){
+        }
+        if(customer != null){
+            System.out.println("Welcome back " + customer.getName());
+            return customer;
+        }
+        else{
+            customer = new Customer();
+            System.out.println("Enter New Customer Data:");
+
+            System.out.println("ID:");
+            customer.setCustomerID(scanner.nextLine());
+
+            System.out.println("Name:");
+            customer.setName(scanner.nextLine());
+
+            System.out.println("Phone number:");
+            customer.setPhone(scanner.nextLine());
+
+            System.out.println("Postal code:");
+            customer.setPostalCode(scanner.nextLine());
+            return customer;
+        }
+    }
+
+
+    private void onShowProductIfExist(){
+        try{
+            System.out.println("Enter product id: ");
+            Scanner scanner = new Scanner(System.in);
+            String productID = scanner.nextLine();
+            outputStream.writeObject("SHOW_PRODUCT");
+            outputStream.writeObject(productID);
+            Product product = (Product) inputStream.readObject();
+            if(product != null){
+                System.out.println(product);
+            }else{
+                System.out.println("No such product exist");
+            }
+
+        }catch (Exception e){
+
+        }
+    }
+
+    private void onFetchAllProductsInBranch(){
+        try{
+            outputStream.writeObject("FETCH_INVENTORY");
+            List<Product> productsInBranch = (List<Product>) inputStream.readObject();
+            System.out.println("List of Product:");
+            System.out.println("-------------------");
+            for (Product pr : productsInBranch) {
+                System.out.println("\n" + pr.toString());
+            }
+            System.out.println("-------------------");
+        }catch (Exception e){
+            System.out.println(e.getMessage());
         }
     }
 
