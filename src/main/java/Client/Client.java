@@ -2,6 +2,7 @@ package Client;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.List;
 import java.util.Scanner;
 
 import org.example.Classes.Employees.Employee;
@@ -9,8 +10,8 @@ import org.example.Classes.Enum.EmployeeType;
 
 public class Client {
 
-    private String serverAddress;
-    private int serverPort;
+    private final String serverAddress;
+    private final int serverPort;
     private Socket socket;
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
@@ -20,15 +21,6 @@ public class Client {
         this.serverAddress = serverAddress;
         this.serverPort = serverPort;
     }
-
-//    public Object handleServerResponse() {
-//        try {
-//            return inputStream.readObject();
-//        } catch (IOException | ClassNotFoundException e) {
-//            e.printStackTrace();
-//            return null;
-//        }
-//    }
 
     public void sendDataToServer(Object data) {
         try {
@@ -92,8 +84,8 @@ public class Client {
         outputStream.writeObject("LOGIN");
 
         // Send credentials to the server for validation
-        sendDataToServer(ID);
-        sendDataToServer(password);
+        outputStream.writeObject(ID);
+        outputStream.writeObject(password);
 
         // Receive the response from the server
         loggedInEmployee = (Employee) inputStream.readObject();
@@ -114,7 +106,7 @@ public class Client {
     }
 
     public void displayMenu() throws IOException {
-        while (true) {
+        while (loggedInEmployee != null) {
             System.out.println("\n--- MENU ---");
             switch (loggedInEmployee.getPosition()) {
                 case FLOOR:
@@ -163,7 +155,7 @@ public class Client {
         System.out.println("8. Logout");
     }
 
-    private void handleMenuChoice(int choice) throws IOException {
+    private void handleMenuChoice(int choice){
         switch (loggedInEmployee.getPosition()) {
             case FLOOR:
                 handleFloorChoice(choice);
@@ -177,34 +169,36 @@ public class Client {
         }
     }
 
-    private void handleFloorChoice(int choice) throws IOException {
-        switch (choice) {
-            case 1:
-                // View Products
-                break;
-            case 2:
-                // Check Inventory
-                break;
-            case 3:
-                // Logout
-                logout();
-                break;
-            case 4:
-                outputStream.writeObject("START_CHAT");
-                try {
+    private void handleFloorChoice(int choice){
+        try {
+            switch (choice) {
+                case 1:
+                    // View Products
+                    break;
+                case 2:
+                    // Manage Customers
+                    break;
+                case 3:
+                    // Fetch Inventory
+                    break;
+                case 4:
+                    outputStream.writeObject("START_CHAT");
                     Object a = inputStream.readObject();
                     System.out.println(a);
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-
-                break;
-            default:
-                System.out.println("Invalid choice. Please try again.");
+                    break;
+                case 5:
+                    // Logout
+                    logout();
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }catch (IOException | ClassNotFoundException e){
+            System.out.println(e.getMessage());
         }
     }
 
-    private void handleCashierChoice(int choice) throws IOException {
+    private void handleCashierChoice(int choice){
         switch (choice) {
             case 1:
                 // View Products
@@ -224,8 +218,9 @@ public class Client {
         }
     }
 
-    private void handleShiftSupervisorChoice(int choice) throws IOException {
-        switch (choice) {
+    private void handleShiftSupervisorChoice(int choice){
+        try{
+            switch (choice) {
             case 1:
                 // View Products
                 break;
@@ -263,6 +258,9 @@ public class Client {
                 break;
             default:
                 System.out.println("Invalid choice. Please try again.");
+            }
+        }catch (IOException e){
+            System.out.println(e.getMessage());
         }
     }
 
@@ -313,6 +311,7 @@ public class Client {
         switch (choice) {
             case 1:
                 // Fetch Employees
+                fetchAllEmployeesInBranch();
                 break;
             case 2:
                 // Add Employee
@@ -326,6 +325,21 @@ public class Client {
                 break;
             default:
                 System.out.println("Invalid choice.");
+        }
+    }
+
+    private void fetchAllEmployeesInBranch() {
+        try{
+            outputStream.writeObject("FETCH_EMPLOYEES");
+            List<Employee> employeesInBranch = (List<Employee>) inputStream.readObject();
+            System.out.println("List of Employees:");
+            System.out.println("-------------------");
+            for (Employee emp : employeesInBranch) {
+                System.out.println("\n" + emp.toString());
+            }
+            System.out.println("-------------------");
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println(e.getMessage());
         }
     }
 
@@ -397,11 +411,18 @@ public class Client {
         }
     }
 
-    private void logout() throws IOException {
+    private void logout(){
+        try {
         System.out.println("Logging out...");
         // Close connection, reset loggedInEmployee, etc.
+        outputStream.writeObject("LOGOUT");
         this.loggedInEmployee = null;
+        Object response = inputStream.readObject();
+        System.out.println(response);
         this.closeSession();
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     public static void main(String[] args) {

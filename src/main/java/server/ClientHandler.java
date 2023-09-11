@@ -7,7 +7,9 @@ import utils.Authentication;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 class ClientHandler implements Runnable {
@@ -17,7 +19,6 @@ class ClientHandler implements Runnable {
     private ObjectOutputStream outputStream;
     private ObjectInputStream inputStream;
     private Employee loggedInUser;
-
     private String clientAddress;
 
 
@@ -38,28 +39,36 @@ class ClientHandler implements Runnable {
 
     @Override
     public void run() {
-        while (true) {
-            try {
-                String command = "";
+        try {
+            String command;
+            while (true) {
+                command = (String) inputStream.readObject();
 
-                while (!command.equals("LOGOUT")){
-                    command = (String) inputStream.readObject();
-                    System.out.println(new Date() + "--> Received from client " + clientAddress + ":" + command);
-                    handleCommandFromClient(command);
-                }
+                System.out.println(new Date() + "--> Received from client " + clientAddress + ":" + command);
+
                 handleCommandFromClient(command);
 
-            } catch (Exception e) {
-                System.out.println("Error processing command: " + e.getMessage());
-            } 
-            finally {
-                try {
-                    clientSocket.close();
-                } catch (IOException e) {
-                    System.out.println("Error closing client socket: " + e.getMessage());
+                if ("LOGOUT".equals(command)) {
+                    System.out.println("Client " + clientAddress + " logged out gracefully.");
+                    break;
                 }
             }
+        } catch (EOFException e) {
+            System.out.println("Client " + clientAddress + " disconnected abruptly.");
+        } catch (SocketException e) {
+            System.out.println("Socket was closed: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error processing command: " + e.getMessage());
+        } finally {
+            try {
+                if (!clientSocket.isClosed()) {
+                    clientSocket.close();
+                }
+            } catch (IOException e) {
+                System.out.println("Error closing client socket: " + e.getMessage());
+            }
         }
+
     }
 
     private void handleCommandFromClient(String command){
@@ -167,7 +176,13 @@ class ClientHandler implements Runnable {
     }
 
     private void handleFetchEmployees() {
-
+        try{
+            EmployeeManagement em = new EmployeeManagement();
+            List<Employee> employeesInBranch = em.getEmployeesByBranch(loggedInUser.getBranchID());
+            outputStream.writeObject(employeesInBranch);
+        }catch(IOException e){
+            System.out.println(e.getMessage());
+        }
     }
 
     private void handleLogin() {
@@ -201,8 +216,7 @@ class ClientHandler implements Runnable {
             if (loggedInUser != null) {
                 loggedInUsers.remove(loggedInUser.getEmployeeID());
                 loggedInUser = null;
-
-                    outputStream.writeObject("Logout successful!");
+                outputStream.writeObject("Logout successful!");
 
             } else {
                 outputStream.writeObject("No user is currently logged in.");
