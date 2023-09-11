@@ -2,7 +2,9 @@ package Client;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Iterator;
 import java.util.Scanner;
+import java.util.Set;
 
 import org.example.Classes.Employees.Employee;
 import org.example.Classes.Enum.EmployeeType;
@@ -21,14 +23,14 @@ public class Client {
         this.serverPort = serverPort;
     }
 
-//    public Object handleServerResponse() {
-//        try {
-//            return inputStream.readObject();
-//        } catch (IOException | ClassNotFoundException e) {
-//            e.printStackTrace();
-//            return null;
-//        }
-//    }
+    // public Object handleServerResponse() {
+    // try {
+    // return inputStream.readObject();
+    // } catch (IOException | ClassNotFoundException e) {
+    // e.printStackTrace();
+    // return null;
+    // }
+    // }
 
     public void sendDataToServer(Object data) {
         try {
@@ -79,7 +81,6 @@ public class Client {
             closeSession();
         }
     }
-
 
     public boolean login() throws IOException, ClassNotFoundException {
         Scanner scanner = new Scanner(System.in);
@@ -190,14 +191,7 @@ public class Client {
                 logout();
                 break;
             case 4:
-                outputStream.writeObject("START_CHAT");
-                try {
-                    Object a = inputStream.readObject();
-                    System.out.println(a);
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-
+                startChat();
                 break;
             default:
                 System.out.println("Invalid choice. Please try again.");
@@ -247,14 +241,15 @@ public class Client {
                 manageEmployees();
                 break;
             case 7:
-                outputStream.writeObject("START_CHAT");
-                try {
-                    Object a = inputStream.readObject();
-                    System.out.println(a);
-                } catch (ClassNotFoundException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                // outputStream.writeObject("START_CHAT");
+                // try {
+                // Object a = inputStream.readObject();
+                // System.out.println(a);
+                // } catch (ClassNotFoundException e) {
+                // // TODO Auto-generated catch block
+                // e.printStackTrace();
+                // }
+                startChat();
 
                 break;
             case 8:
@@ -402,6 +397,37 @@ public class Client {
         // Close connection, reset loggedInEmployee, etc.
         this.loggedInEmployee = null;
         this.closeSession();
+    }
+
+    private void startChat() {
+        sendDataToServer("START_CHAT");
+        try {
+            Object loggedInUsers = inputStream.readObject();
+            if (loggedInUsers instanceof Set) {
+                Iterator<String> iterator = ((Set) loggedInUsers).iterator();
+                System.out.println("Available users:");
+                // Iterate using the iterator
+                while (iterator.hasNext()) {
+                    String user = iterator.next();
+                    if (!user.equals(loggedInEmployee.getEmployeeID())) {
+                        System.out.println("\n" + user);
+                    }
+                }
+                System.out.print("\nWith who you want to chat? (insert ID) ");
+                Scanner scanner = new Scanner(System.in);
+                String userToChat = scanner.next();
+                sendDataToServer("GET_EMPLOYEE_DETAILS");
+                sendDataToServer(userToChat);
+                Object employee = (Object) inputStream.readObject();
+                System.out.println("You chose to talk to: " + employee);
+            }
+
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public static void main(String[] args) {

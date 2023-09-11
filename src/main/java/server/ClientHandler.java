@@ -42,7 +42,7 @@ class ClientHandler implements Runnable {
             try {
                 String command = "";
 
-                while (!command.equals("LOGOUT")){
+                while (!command.equals("LOGOUT")) {
                     command = (String) inputStream.readObject();
                     System.out.println(new Date() + "--> Received from client " + clientAddress + ":" + command);
                     handleCommandFromClient(command);
@@ -62,16 +62,16 @@ class ClientHandler implements Runnable {
         }
     }
 
-    private void handleCommandFromClient(String command){
+    private void handleCommandFromClient(String command) {
         switch (command) {
             case "LOGIN":
-                    handleLogin();
+                handleLogin();
                 break;
             case "FETCH_EMPLOYEES":
                 handleFetchEmployees();
                 break;
             case "ADD_EMPLOYEE":
-                    handleAddEmployee();
+                handleAddEmployee();
                 break;
             case "UPDATE_EMPLOYEE":
                 handleUpdateEmployee();
@@ -94,6 +94,11 @@ class ClientHandler implements Runnable {
             case "START_CHAT":
                 handleStartChat();
                 break;
+            case "GET_EMPLOYEE_DETAILS":
+                handleFetchEmployeeById();
+                break;
+            case "CONNECT_TO_CHAT":
+                break;
             case "GET_REPORT_BY_BRANCH":
                 handleGetReportByBranch();
                 break;
@@ -104,7 +109,7 @@ class ClientHandler implements Runnable {
                 handleGetReportByCategory();
                 break;
             case "LOGOUT":
-                    handleLogout();
+                handleLogout();
                 break;
 
             // ... other command handlers
@@ -137,6 +142,23 @@ class ClientHandler implements Runnable {
     }
 
     private void processSell() {
+    }
+
+    private void handleFetchEmployeeById() {
+        try {
+            String employeeId = (String) inputStream.readObject();
+            EmployeeManagement em = new EmployeeManagement();
+            Employee employee = em.getEmployeeDetails(employeeId);
+            outputStream.writeObject(employee.getName());
+        } catch (IOException e) {
+            try {
+                outputStream.writeObject(false);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     private void handleAddEmployee() {
@@ -196,13 +218,13 @@ class ClientHandler implements Runnable {
         }
     }
 
-    private void handleLogout(){
+    private void handleLogout() {
         try {
             if (loggedInUser != null) {
                 loggedInUsers.remove(loggedInUser.getEmployeeID());
                 loggedInUser = null;
 
-                    outputStream.writeObject("Logout successful!");
+                outputStream.writeObject("Logout successful!");
 
             } else {
                 outputStream.writeObject("No user is currently logged in.");
