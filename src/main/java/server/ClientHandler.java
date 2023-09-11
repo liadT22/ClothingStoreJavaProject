@@ -65,21 +65,13 @@ class ClientHandler implements Runnable {
     private void handleCommandFromClient(String command){
         switch (command) {
             case "LOGIN":
-                try {
                     handleLogin();
-                } catch (IOException | ClassNotFoundException e) {
-                    System.out.println(e.getMessage());
-                }
                 break;
             case "FETCH_EMPLOYEES":
                 handleFetchEmployees();
                 break;
             case "ADD_EMPLOYEE":
-                try {
                     handleAddEmployee();
-                } catch (IOException | ClassNotFoundException e) {
-                    System.out.println(e.getMessage());
-                }
                 break;
             case "UPDATE_EMPLOYEE":
                 handleUpdateEmployee();
@@ -112,11 +104,7 @@ class ClientHandler implements Runnable {
                 handleGetReportByCategory();
                 break;
             case "LOGOUT":
-                try {
                     handleLogout();
-                } catch (IOException e) {
-                    System.out.println(e.getMessage());
-                }
                 break;
 
             // ... other command handlers
@@ -208,13 +196,19 @@ class ClientHandler implements Runnable {
         }
     }
 
-    private void handleLogout() throws IOException {
-        if (loggedInUser != null) {
-            loggedInUsers.remove(loggedInUser.getEmployeeID());
-            loggedInUser = null;
-            outputStream.writeObject("Logout successful!");
-        } else {
-            outputStream.writeObject("No user is currently logged in.");
+    private void handleLogout(){
+        try {
+            if (loggedInUser != null) {
+                loggedInUsers.remove(loggedInUser.getEmployeeID());
+                loggedInUser = null;
+
+                    outputStream.writeObject("Logout successful!");
+
+            } else {
+                outputStream.writeObject("No user is currently logged in.");
+            }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
         }
     }
 
