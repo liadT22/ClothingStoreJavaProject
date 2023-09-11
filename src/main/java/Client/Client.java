@@ -2,8 +2,10 @@ package Client;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 
 import org.example.Classes.Employees.Employee;
 import org.example.Classes.Enum.EmployeeType;
@@ -71,7 +73,6 @@ public class Client {
             closeSession();
         }
     }
-
 
     public boolean login() throws IOException, ClassNotFoundException {
         Scanner scanner = new Scanner(System.in);
@@ -155,7 +156,7 @@ public class Client {
         System.out.println("8. Logout");
     }
 
-    private void handleMenuChoice(int choice){
+    private void handleMenuChoice(int choice) {
         switch (loggedInEmployee.getPosition()) {
             case FLOOR:
                 handleFloorChoice(choice);
@@ -169,7 +170,7 @@ public class Client {
         }
     }
 
-    private void handleFloorChoice(int choice){
+    private void handleFloorChoice(int choice) {
         try {
             switch (choice) {
                 case 1:
@@ -182,9 +183,7 @@ public class Client {
                     // Fetch Inventory
                     break;
                 case 4:
-                    outputStream.writeObject("START_CHAT");
-                    Object a = inputStream.readObject();
-                    System.out.println(a);
+                    startChat();
                     break;
                 case 5:
                     // Logout
@@ -193,12 +192,12 @@ public class Client {
                 default:
                     System.out.println("Invalid choice. Please try again.");
             }
-        }catch (IOException | ClassNotFoundException e){
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
 
-    private void handleCashierChoice(int choice){
+    private void handleCashierChoice(int choice) {
         switch (choice) {
             case 1:
                 // View Products
@@ -218,48 +217,49 @@ public class Client {
         }
     }
 
-    private void handleShiftSupervisorChoice(int choice){
-        try{
+    private void handleShiftSupervisorChoice(int choice) {
+        try {
             switch (choice) {
-            case 1:
-                // View Products
-                break;
-            case 2:
-                // Manage Customers
-                break;
-            case 3:
-                // Check Inventory
-                break;
-            case 4:
-                // Process Sale
-                break;
-            case 5:
-                // View Sales Report
-                manageSalesReports();
-                break;
-            case 6:
-                // Manage Employees
-                manageEmployees();
-                break;
-            case 7:
-                outputStream.writeObject("START_CHAT");
-                try {
-                    Object a = inputStream.readObject();
-                    System.out.println(a);
-                } catch (ClassNotFoundException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                case 1:
+                    // View Products
+                    break;
+                case 2:
+                    // Manage Customers
+                    break;
+                case 3:
+                    // Check Inventory
+                    break;
+                case 4:
+                    // Process Sale
+                    break;
+                case 5:
+                    // View Sales Report
+                    manageSalesReports();
+                    break;
+                case 6:
+                    // Manage Employees
+                    manageEmployees();
+                    break;
+                case 7:
+                    // outputStream.writeObject("START_CHAT");
+                    // try {
+                    // Object a = inputStream.readObject();
+                    // System.out.println(a);
+                    // } catch (ClassNotFoundException e) {
+                    // // TODO Auto-generated catch block
+                    // e.printStackTrace();
+                    // }
+                    startChat();
 
-                break;
-            case 8:
-                // Logout
-                logout();
-                break;
-            default:
-                System.out.println("Invalid choice. Please try again.");
+                    break;
+                case 8:
+                    // Logout
+                    logout();
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
             }
-        }catch (IOException e){
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
@@ -329,7 +329,7 @@ public class Client {
     }
 
     private void fetchAllEmployeesInBranch() {
-        try{
+        try {
             outputStream.writeObject("FETCH_EMPLOYEES");
             List<Employee> employeesInBranch = (List<Employee>) inputStream.readObject();
             System.out.println("List of Employees:");
@@ -424,6 +424,37 @@ public class Client {
             System.out.println(e.getMessage());
         }
     }
+    private void startChat() {
+        sendDataToServer("START_CHAT");
+        try {
+            Object loggedInUsers = inputStream.readObject();
+            if (loggedInUsers instanceof Set) {
+                Iterator<String> iterator = ((Set) loggedInUsers).iterator();
+                System.out.println("Available users:");
+                // Iterate using the iterator
+                while (iterator.hasNext()) {
+                    String user = iterator.next();
+                    if (!user.equals(loggedInEmployee.getEmployeeID())) {
+                        System.out.println("\n" + user);
+                    }
+                }
+                System.out.print("\nWith who you want to chat? (insert ID) ");
+                Scanner scanner = new Scanner(System.in);
+                String userToChat = scanner.next();
+                sendDataToServer("GET_EMPLOYEE_DETAILS");
+                sendDataToServer(userToChat);
+                Object employee = (Object) inputStream.readObject();
+                System.out.println("You chose to talk to: " + employee);
+            }
+
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
 
     public static void main(String[] args) {
         Client client = new Client("localhost", 8080);
