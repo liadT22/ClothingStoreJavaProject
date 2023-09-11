@@ -54,13 +54,16 @@ public class EmployeeManagement {
 
 
     public List<Employee> getEmployeesByBranch(String branchID) {
-        List<Employee> employees = getEmployeesFromFile();
-        for (int i = 0; i < employees.size(); i++) {
-            if (!employees.get(i).getBranchID().equals(branchID)) {
-                employees.remove(i);
+        List<Employee> allEmployees = getEmployeesFromFile();
+        List<Employee> employeesInBranch = new ArrayList<Employee>();
+
+        for (Employee e: allEmployees){
+            if (e.getBranchID().equals(branchID)){
+                employeesInBranch.add(e);
             }
         }
-        return employees;
+
+        return employeesInBranch;
 
     }
 
