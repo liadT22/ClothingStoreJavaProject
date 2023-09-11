@@ -2,7 +2,9 @@ package org.example.Classes.Employees;
 
 import org.example.Classes.Enum.EmployeeType;
 
-public class Employee {
+import java.io.Serializable;
+
+public class Employee implements Serializable {
     // שם עובד, תז, מספר סניף, סיסמה, האם אדמין, מספר חשבון, תפקיד
     private String employeeID;
     private String name;

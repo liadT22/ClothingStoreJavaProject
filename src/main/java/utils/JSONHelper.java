@@ -10,11 +10,10 @@ public class JSONHelper {
     private static final String DIRECTORY_PATH = "src/main/resources/";
 
     public static void checkAndCreateFiles() {
-        checkAndCreateFile("productsData.json");
-        checkAndCreateFile("branchStock.json");
+        checkAndCreateFile("products.json");
         checkAndCreateFile("salesAnalytics.json");
         checkAndCreateFile("employees.json");
-        checkAndCreateFile("branchesData.json");
+        checkAndCreateFile("branches.json");
         checkAndCreateFile("customers.json");
     }
 

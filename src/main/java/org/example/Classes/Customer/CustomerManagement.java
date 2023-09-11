@@ -1,20 +1,20 @@
-package org.example.Classes;
+package org.example.Classes.Customer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
+import org.example.Classes.Customer.Customer;
+import org.example.Classes.Employees.Employee;
+import org.example.Classes.Employees.Manager;
 import org.example.Classes.Enum.CustomerType;
+import org.example.Classes.Product;
 import utils.JSONHelper;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Scanner;
 
 public class CustomerManagement {
     private List<Customer> customers;
@@ -29,8 +29,12 @@ public class CustomerManagement {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonArray = objectMapper.readTree(json);
         for (JsonNode element : jsonArray) {
-            Customer object = objectMapper.treeToValue(element, Customer.class);
-            this.customers.add(object);
+            try{
+                Customer object = objectMapper.treeToValue(element, Customer.class);
+                this.customers.add(object);
+            }catch (Exception e){
+                System.out.println(e.getMessage());
+            }
         }
     }
 
@@ -54,7 +58,12 @@ public class CustomerManagement {
         this.readFile();
         for (int i = 0; i < this.customers.size(); i++) {
             if (Objects.equals(this.customers.get(i).getCustomerID(), customer.getCustomerID())) {
-                this.customers.set(i, customer);
+                try{
+                    this.customers.set(i, customer);
+                    break;
+                } catch (Exception e){
+                    System.out.println(e.getMessage());
+                }
             }
         }
         this.writeToFile();
@@ -73,11 +82,36 @@ public class CustomerManagement {
 
     public Customer getCustomerDetails(String customerID) throws FileNotFoundException, JsonProcessingException {
         this.readFile();
-        for (int i = 0; i < this.customers.size(); i++) {
-            if (Objects.equals(this.customers.get(i).getCustomerID(), customerID)) {
-                return this.customers.get(i);
+        for (Customer customer : this.customers) {
+            if (Objects.equals(customer.getCustomerID(), customerID)) {
+                return customer;
             }
         }
         throw new RuntimeException("customer is not in the database");
+    }
+
+    public void onBuyProduct(Product product,String branchID , int amount, String customerID, String name, String postalCode, String phone) throws FileNotFoundException, JsonProcessingException {
+        this.readFile();
+        Customer upgradedCustomer = null;
+        boolean isCustomerExist = false;
+        for (Customer customer : this.customers) {
+            if (Objects.equals(customer.getCustomerID(), customerID)) {
+                isCustomerExist = true;
+                if (customer.getCustomerType() == CustomerType.NEW) {
+                    upgradedCustomer = new ReturningCustomer(customer.getCustomerID(), customer.getName(), customer.getPostalCode(), customer.getPhone());
+                } else if (customer.getCustomerType() == CustomerType.RETURNING) {
+                    upgradedCustomer = new VIPCustomer(customer.getCustomerID(), customer.getName(), customer.getPostalCode(), customer.getPhone());
+                }
+                assert upgradedCustomer != null;
+                upgradedCustomer.buyProduct(product, amount, branchID);
+                this.updateCustomer(upgradedCustomer);
+                break;
+            }
+        }
+        if(!isCustomerExist){
+            Customer newCustomer = new NewCustomer(customerID, name, postalCode, phone);
+            newCustomer.buyProduct(product, amount, branchID);
+            addCustomer(newCustomer);
+        }
     }
 }

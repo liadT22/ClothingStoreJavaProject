@@ -1,27 +1,30 @@
 package server;
 
+import org.example.Classes.Employees.Employee;
+import org.example.Classes.Employees.EmployeeManagement;
 import org.example.Classes.Enum.EmployeeType;
-import shared.*;
-import shared.Commands;
-import utils.JSONHelper;
+import utils.Authentication;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.InputMismatchException;
-import java.util.List;
-import java.util.Scanner;
+import java.util.Set;
 
 class ClientHandler implements Runnable {
 
-    private Socket clientSocket;
+    private final Socket clientSocket;
+    private final Set<String> loggedInUsers;
     private ObjectOutputStream outputStream;
     private ObjectInputStream inputStream;
-    private EmployeeType loggedInUserType;
+    private Employee loggedInUser;
 
 
 
-    public ClientHandler(Socket clientSocket) {
+
+    public ClientHandler(Socket clientSocket, Set<String> loggedInUsers) throws IOException {
         this.clientSocket = clientSocket;
+        this.loggedInUsers = loggedInUsers;
+        outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
+        inputStream = new ObjectInputStream(clientSocket.getInputStream());
     }
 
     @Override
@@ -30,21 +33,49 @@ class ClientHandler implements Runnable {
             try {
                 String command = (String) inputStream.readObject();
                 switch (command) {
-                    case Commands.LOGIN:
+                    case "LOGIN":
                         handleLogin();
                         break;
-                    case Commands.FETCH_EMPLOYEES:
+                    case "FETCH_EMPLOYEES":
                         handleFetchEmployees();
                         break;
-                    case Commands.UPDATE_EMPLOYEES:
-                        handleUpdateEmployees();
+                    case "ADD_EMPLOYEE":
+                        handleAddEmployee();
                         break;
-                    case Commands.UPDATE_INVENTORY:
+                    case "UPDATE_EMPLOYEE":
+                        handleUpdateEmployee();
+                        break;
+                    case "UPDATE_INVENTORY":
                         handleUpdateInventory();
                         break;
-                    case Commands.FETCH_INVENTORY:
+                    case "FETCH_INVENTORY":
                         handleFetchInventory();
                         break;
+                    case "ADD_CUSTOMER":
+                        handleAddECustomer();
+                        break;
+                    case "UPDATE_CUSTOMER":
+                        handleUpdateCustomer();
+                        break;
+                    case "PROCESS_SELL":
+                        processSell();
+                        break;
+                    case "START_CHAT":
+                        handleStartChat();
+                        break;
+                    case "GET_REPORT_BY_BRANCH":
+                        handleGetReportByBranch();
+                        break;
+                    case "GET_REPORT_BY_PRODUCT":
+                        handleGetReportByProduct();
+                        break;
+                    case "GET_REPORT_BY_CATEGROY":
+                        handleGetReportByCategory();
+                        break;
+                    case "LOGOUT":
+                        handleLogout();
+                        break;
+                        
                     // ... other command handlers
                     default:
                         System.out.println("Unknown command received.");
@@ -61,37 +92,83 @@ class ClientHandler implements Runnable {
         }
     }
 
+    private void handleUpdateCustomer() {
+    }
+
+    private void handleAddECustomer() {
+    }
+
+    private void handleGetReportByCategory() {
+    }
+
+    private void handleGetReportByProduct() {
+    }
+
+    private void handleGetReportByBranch() {
+    }
+
+    private void handleStartChat() {
+    }
+
+    private void processSell() {
+    }
+
+    private void handleAddEmployee() throws IOException, ClassNotFoundException {
+        try{
+            Employee newEmployee = (Employee) inputStream.readObject();
+            EmployeeManagement em = new EmployeeManagement();
+            em.addEmployee(newEmployee);
+            outputStream.writeObject(true);
+        } catch (IOException e){
+            outputStream.writeObject(false);
+        }
+
+    }
+
     private void handleFetchInventory() {
     }
 
     private void handleUpdateInventory() {
     }
 
-    private void handleUpdateEmployees() {
+    private void handleUpdateEmployee() {
     }
 
     private void handleFetchEmployees() {
+
     }
 
     private void handleLogin() throws IOException, ClassNotFoundException {
-        String username = (String) inputStream.readObject();
+        String ID = (String) inputStream.readObject();
         String password = (String) inputStream.readObject();
 
-        boolean isValid = validateCredentials(username, password);
-        outputStream.writeObject(isValid);
+        // Check if user is already logged in
+        synchronized (loggedInUsers) {
+            if (loggedInUsers.contains(ID)) {
+                outputStream.writeObject("User already logged in from another device.");
+                return;
+            }
+
+            Employee employee = Authentication.authLogin(ID, password);
+            if (employee != null) {
+                loggedInUsers.add(ID);
+                loggedInUser = employee;
+            }
+        }
+        outputStream.writeObject(this.loggedInUser);
     }
 
-    private boolean validateCredentials(String username, String password) {
-//        // Fetch employee data from employees.json using JSONHelper
-//        List<Employee> employees = JSONHelper.readEmployeesFromJSON();
-//
-//        for (Employee employee : employees) {
-//            if (employee.getUsername().equals(username) && employee.getPassword().equals(password)) {
-//                return true; // Credentials are valid
-//            }
-//        }
-        return false; // Credentials are invalid
+    private void handleLogout() throws IOException {
+        if (loggedInUser != null) {
+            loggedInUsers.remove(loggedInUser.getEmployeeID());
+            loggedInUser = null;
+            outputStream.writeObject("Logout successful!");
+        } else {
+            outputStream.writeObject("No user is currently logged in.");
+        }
     }
+
+
 
 
 }
